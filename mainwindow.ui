@@ -7,29 +7,39 @@
     <x>0</x>
     <y>0</y>
     <width>638</width>
-    <height>337</height>
+    <height>445</height>
    </rect>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
   </property>
   <widget class="QWidget" name="centralWidget">
-   <layout class="QFormLayout" name="formLayout">
+   <layout class="QGridLayout" name="gridLayout">
+    <item row="2" column="0" rowspan="4">
+     <widget class="QTreeView" name="treeView"/>
+    </item>
+    <item row="1" column="0" alignment="Qt::AlignLeft">
+     <widget class="QComboBox" name="comboBox"/>
+    </item>
     <item row="0" column="0">
      <widget class="QLabel" name="label">
       <property name="text">
-       <string>Диск</string>
+       <string>Disk</string>
       </property>
      </widget>
     </item>
-    <item row="1" column="0">
-     <widget class="QComboBox" name="comboBox"/>
-    </item>
-    <item row="2" column="0">
-     <widget class="QTreeView" name="treeView"/>
-    </item>
     <item row="2" column="1">
+     <widget class="QTreeView" name="treeView_2"/>
+    </item>
+    <item row="3" column="1">
      <widget class="QTableView" name="tableView"/>
+    </item>
+    <item row="4" column="1">
+     <widget class="QProgressBar" name="progressBar">
+      <property name="value">
+       <number>24</number>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

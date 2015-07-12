@@ -7,16 +7,19 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
     dirModel_(new QFileSystemModel(this)),
-    fileModel_(new QFileSystemModel(this))
+    fileModel_(new QFileSystemModel(this)),
+    statGetter_(new StatGetter(ui_->tableView, this))
 {
     SetPositionCenter();
 
     ui_->setupUi(this);
 
     QFileSystemModel* model = new QFileSystemModel(this);
+    // TODO: check on windows
     model->setFilter(QDir::Drives);
     //model->setFilter(QDir::AllEntries);
     //model->setRootPath("/home/novice");
+//    model->
     ui_->comboBox->setModel(model);
 
     //dirModel_->setRootPath(initPath);
@@ -24,6 +27,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_->treeView->setModel(dirModel_);
 
 
+    fileModel_->setFilter(QDir::Files | QDir::NoDotAndDotDot);
+    ui_->tableView->setModel(fileModel_);
 }
 
 MainWindow::~MainWindow()
@@ -58,4 +63,10 @@ void MainWindow::on_comboBox_activated(const QString& arg1)
 void MainWindow::on_comboBox_currentIndexChanged(const QString& arg1)
 {
     dirModel_->setRootPath(arg1);
+}
+
+void MainWindow::on_treeView_clicked(const QModelIndex& index)
+{
+    const QString selectedPath = dirModel_->fileInfo(index).absoluteFilePath();
+//    StatGetter->GetStatsForPath(selectedPath);
 }
