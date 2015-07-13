@@ -1,4 +1,5 @@
-﻿#include <QDesktopWidget>
+﻿#include <QDebug>
+#include <QDesktopWidget>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -67,6 +68,7 @@ void MainWindow::on_comboBox_currentIndexChanged(const QString& arg1)
 
 void MainWindow::on_treeView_clicked(const QModelIndex& index)
 {
+    qDebug() << "on_treeView_clicked";
     const QString selectedPath = dirModel_->fileInfo(index).absoluteFilePath();
-//    StatGetter->GetStatsForPath(selectedPath);
+    statGetter_->GetStatsForPath(selectedPath);
 }

@@ -3,31 +3,29 @@
 
 #include <QObject>
 #include <QTableView>
+#include <QThread>
 
 class StatGetterThread : public QObject
 {
     Q_OBJECT
 
 public slots:
-    void doWork(const QString& parameter) {
-        QString result;
-        /* ... here is the expensive or blocking operation ... */
-        emit resultReady(result);
-    }
+    void doWork(const QString& parameter);
 
-signals:
+    signals:
     void resultReady(const QString &result);
 };
 
 class StatGetter : public QObject
 {
     Q_OBJECT
+
 public:
     explicit StatGetter(QTableView *&tableView, QObject* parent = 0);
     ~StatGetter();
+    void GetStatsForPath(const QString& rootPath);
 
 private:
-    void GetStatsForPath(const QString& rootPath);
     void InitThread();
     void RemoveThread();
 
@@ -40,7 +38,7 @@ signals:
     void operate(const QString& );
 
 public slots:
-    void handleResults(const QString& );
+    void handleResults(const QString& result);
 };
 
 //class Controller : public QObject
