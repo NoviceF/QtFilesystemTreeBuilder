@@ -1,6 +1,8 @@
 ﻿#include <QDebug>
 #include <QString>
-#include <QMessageBox>
+//#include <QMessageBox>
+#include <QProgressDialog>
+#include <QApplication>
 
 #include <unistd.h>
 
@@ -34,29 +36,45 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     {
         qDebug() << "thread already running";
         // диалог
-        QMessageBox msgBox;
-        msgBox.setIcon(QMessageBox::Question);
-        msgBox.setText("Previous operation in progress now..");
-        msgBox.setInformativeText("Do you want to interrupt operation?");
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
-                                  QMessageBox::Cancel);
-        msgBox.setDefaultButton(QMessageBox::Cancel);
-        int ret = msgBox.exec();
+//        QMessageBox msgBox;
+//        msgBox.setIcon(QMessageBox::Question);
+//        msgBox.setText("Previous operation in progress now..");
+//        msgBox.setInformativeText("Do you want to interrupt operation?");
+//        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+//                                  QMessageBox::Cancel);
+//        msgBox.setDefaultButton(QMessageBox::Cancel);
+////        int ret = msgBox.exec();
+//        msgBox.show();
 
-        switch (ret) {
-            case QMessageBox::Yes:
-                // Save was clicked
+//        switch (ret) {
+//            case QMessageBox::Yes:
+//                // Save was clicked
+//                break;
+//            case QMessageBox::No:
+//                // Don't Save was clicked
+//                break;
+//            case QMessageBox::Cancel:
+//                // Cancel was clicked
+//                break;
+//            default:
+//                // should never be reached
+//                break;
+//        }
+
+        int numFiles = 5;
+        QProgressDialog progress("Copying files...", "Abort Copy", 0, numFiles,
+                                 QApplication::topLevelWidgets().at(0));
+        progress.setWindowModality(Qt::WindowModal);
+
+        for (int i = 0; i < numFiles; i++) {
+            sleep (1);
+            progress.setValue(i);
+
+            if (progress.wasCanceled())
                 break;
-            case QMessageBox::No:
-                // Don't Save was clicked
-                break;
-            case QMessageBox::Cancel:
-                // Cancel was clicked
-                break;
-            default:
-                // should never be reached
-                break;
+            //... copy one file
         }
+        progress.setValue(numFiles);
     }
 }
 
