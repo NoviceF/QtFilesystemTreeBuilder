@@ -1,5 +1,7 @@
 ﻿#include <QDebug>
 #include <QString>
+#include <QMessageBox>
+
 #include <unistd.h>
 
 #include "statgetter.h"
@@ -31,6 +33,30 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     else
     {
         qDebug() << "thread already running";
+        // диалог
+        QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setText("Previous operation in progress now..");
+        msgBox.setInformativeText("Do you want to interrupt operation?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
+                                  QMessageBox::Cancel);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        int ret = msgBox.exec();
+
+        switch (ret) {
+            case QMessageBox::Yes:
+                // Save was clicked
+                break;
+            case QMessageBox::No:
+                // Don't Save was clicked
+                break;
+            case QMessageBox::Cancel:
+                // Cancel was clicked
+                break;
+            default:
+                // should never be reached
+                break;
+        }
     }
 }
 
