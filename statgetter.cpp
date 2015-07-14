@@ -1,7 +1,6 @@
 ﻿#include <QDebug>
 #include <QString>
-//#include <QMessageBox>
-#include <QProgressDialog>
+#include <QMessageBox>
 #include <QDialog>
 #include <QApplication>
 #include <QWidget>
@@ -9,6 +8,34 @@
 #include <unistd.h>
 
 #include "statgetter.h"
+
+StatGetterThread::StatGetterThread() :
+    percentOfWorkDone_(0)
+{
+
+}
+
+void StatGetterThread::doWork(const QString& parameter)
+{
+    QString result (parameter);
+    qDebug() << "do calculation in thread";
+
+    for (int i = 0; i < 5; ++i)
+    {
+        percentOfWorkDone_ = percentOfWorkDone_ + 20;
+        emit percetnOfWorkDone(percentOfWorkDone_);
+        sleep(1);
+    }
+
+    emit resultReady(result);
+    emit percetnOfWorkDone(percentOfWorkDone_);
+    percentOfWorkDone_ = -1;
+}
+
+void StatGetterThread::requestPercetnOfWorkDone()
+{
+
+}
 
 StatGetter::StatGetter(QTableView*& tableView, QObject* parent) :
     QObject(parent),
@@ -39,23 +66,29 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     {
         qDebug() << "thread already running";
         // диалог
-        int numFiles = 5;
-        QProgressDialog progress("The treatment is the previous query...",
-                                 "Cancel", 0, 100,
-                                 qobject_cast<QWidget *>(parent()));
+            QMessageBox msgBox;
+        msgBox.setIcon(QMessageBox::Question);
+        msgBox.setText("Previous operation in progress now..");
+        msgBox.setInformativeText("Do you want to interrupt operation?");
+        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+        msgBox.setDefaultButton(QMessageBox::Cancel);
+        int ret = msgBox.exec();
 
-        progress.setWindowModality(Qt::WindowModal);
-
-        for (int i = 0; i < numFiles; i++) {
-
-            progress.setValue(i);
-
-            if (progress.wasCanceled())
+        switch (ret)
+        {
+            case QMessageBox::Yes:
+                // Save was clicked
                 break;
-            //... copy one file
+            case QMessageBox::No:
+                // Don't Save was clicked
+                break;
+            case QMessageBox::Cancel:
+                // Cancel was clicked
+                break;
+            default:
+                // should never be reached
+                break;
         }
-
-        progress.setValue(numFiles);
     }
 }
 
@@ -68,11 +101,14 @@ void StatGetter::InitThread()
     worker->moveToThread(&workerThread_);
     connect(&workerThread_, &QThread::finished, worker, &QObject::deleteLater);
     connect(this, &StatGetter::operate, worker, &StatGetterThread::doWork);
+    connect(this, &StatGetter::requestWorkDonePercentage, worker,
+            &StatGetterThread::requestPercetnOfWorkDone);
+
     connect(worker, &StatGetterThread::resultReady, this,
             &StatGetter::handleResults);
     //TODO: привязать к прогресс бару основного окна
     connect(worker, &StatGetterThread::percetnOfWorkDone, this,
-            &StatGetter::setWorkDonePercentage);
+            &StatGetter::answerWorkDonePercentageProcess);
     workerThread_.start();
     qDebug() << "thread start";
 }
@@ -91,21 +127,18 @@ void StatGetter::handleResults(const QString& result)
     RemoveThread();
 }
 
-void StatGetter::setWorkDonePercentage(const int)
+void StatGetter::answerWorkDonePercentageProcess(int percent)
 {
+    if (percent < 0 || percent > 100)
+    {
+        RemoveThread();
+        emit(workDoneStatus(0));
+    }
+    else
+    {
+        emit(workDoneStatus(percent));
+    }
 
 }
 
-void StatGetterThread::doWork(const QString& parameter)
-{
-    QString result (parameter);
-    qDebug() << "do calculation in thread";
-    sleep(3);
 
-    emit resultReady(result);
-}
-
-void StatGetterThread::percetnOfWorkDone(const int percent)
-{
-
-}

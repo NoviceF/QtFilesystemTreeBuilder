@@ -30,6 +30,12 @@ MainWindow::MainWindow(QWidget *parent) :
 
     fileModel_->setFilter(QDir::Files | QDir::NoDotAndDotDot);
     ui_->tableView->setModel(fileModel_);
+
+    ui_->progressBar->setMinimum(0);
+    ui_->progressBar->setMaximum(100);
+    ui_->progressBar->setValue(0);
+    connect(statGetter_, &StatGetter::workDoneStatus, ui_->progressBar,
+            &QProgressBar::setValue);
 }
 
 MainWindow::~MainWindow()

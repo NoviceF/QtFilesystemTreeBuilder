@@ -8,13 +8,20 @@
 class StatGetterThread : public QObject
 {
     Q_OBJECT
+public:
+    StatGetterThread();
+
+private:
+    int percentOfWorkDone_;
+
 
 public slots:
     void doWork(const QString& parameter);
-    void percetnOfWorkDone(const int percent);
+    void requestPercetnOfWorkDone();
 
     signals:
     void resultReady(const QString &result);
+    void percetnOfWorkDone(int percent);
 };
 
 class StatGetter : public QObject
@@ -38,10 +45,11 @@ private:
 
 signals:
     void operate(const QString& );
+    void workDoneStatus(int);
 
 public slots:
     void handleResults(const QString& result);
-    void setWorkDonePercentage(const int);
+    void answerWorkDonePercentageProcess(int percent);
 };
 
 #endif // STATGETTER_H
