@@ -91,6 +91,11 @@ void StatGetter::handleResults(const QString& result)
     RemoveThread();
 }
 
+void StatGetter::setWorkDonePercentage(const int)
+{
+
+}
+
 void StatGetterThread::doWork(const QString& parameter)
 {
     QString result (parameter);
@@ -98,4 +103,9 @@ void StatGetterThread::doWork(const QString& parameter)
     sleep(3);
 
     emit resultReady(result);
+}
+
+void StatGetterThread::percetnOfWorkDone(const int percent)
+{
+
 }
