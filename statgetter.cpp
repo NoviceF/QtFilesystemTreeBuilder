@@ -32,16 +32,10 @@ void StatGetterThread::doWork(const QString& parameter)
     percentOfWorkDone_ = -1;
 }
 
-void StatGetterThread::requestPercetnOfWorkDone()
-{
-
-}
-
 StatGetter::StatGetter(QTableView*& tableView, QObject* parent) :
     QObject(parent),
     tableView_(tableView),
-    running_(false),
-    percentOfWorkDone_(0)
+    running_(false)
 {
 
 }
@@ -95,20 +89,20 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
 void StatGetter::InitThread()
 {
     qDebug() << "init thread";
-    percentOfWorkDone_ = 0;
     running_ = false;
+
     StatGetterThread* worker = new StatGetterThread;
     worker->moveToThread(&workerThread_);
+
     connect(&workerThread_, &QThread::finished, worker, &QObject::deleteLater);
+
     connect(this, &StatGetter::operate, worker, &StatGetterThread::doWork);
-    connect(this, &StatGetter::requestWorkDonePercentage, worker,
-            &StatGetterThread::requestPercetnOfWorkDone);
 
     connect(worker, &StatGetterThread::resultReady, this,
             &StatGetter::handleResults);
-    //TODO: привязать к прогресс бару основного окна
     connect(worker, &StatGetterThread::percetnOfWorkDone, this,
-            &StatGetter::answerWorkDonePercentageProcess);
+            &StatGetter::workDonePercentageHandler);
+
     workerThread_.start();
     qDebug() << "thread start";
 }
@@ -118,7 +112,7 @@ void StatGetter::RemoveThread()
     qDebug() << "remove thread";
     running_ = false;
     workerThread_.quit();
-    workerThread_.wait();
+//    workerThread_.wait();
 }
 
 void StatGetter::handleResults(const QString& result)
@@ -127,7 +121,7 @@ void StatGetter::handleResults(const QString& result)
     RemoveThread();
 }
 
-void StatGetter::answerWorkDonePercentageProcess(int percent)
+void StatGetter::workDonePercentageHandler(int percent)
 {
     if (percent < 0 || percent > 100)
     {

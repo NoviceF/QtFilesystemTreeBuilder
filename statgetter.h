@@ -17,7 +17,6 @@ private:
 
 public slots:
     void doWork(const QString& parameter);
-    void requestPercetnOfWorkDone();
 
     signals:
     void resultReady(const QString &result);
@@ -49,7 +48,7 @@ signals:
 
 public slots:
     void handleResults(const QString& result);
-    void answerWorkDonePercentageProcess(int percent);
+    void workDonePercentageHandler(int percent);
 };
 
 #endif // STATGETTER_H
