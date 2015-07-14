@@ -2,7 +2,9 @@
 #include <QString>
 //#include <QMessageBox>
 #include <QProgressDialog>
+#include <QDialog>
 #include <QApplication>
+#include <QWidget>
 
 #include <unistd.h>
 
@@ -11,7 +13,8 @@
 StatGetter::StatGetter(QTableView*& tableView, QObject* parent) :
     QObject(parent),
     tableView_(tableView),
-    running_(false)
+    running_(false),
+    percentOfWorkDone_(0)
 {
 
 }
@@ -36,44 +39,22 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     {
         qDebug() << "thread already running";
         // диалог
-//        QMessageBox msgBox;
-//        msgBox.setIcon(QMessageBox::Question);
-//        msgBox.setText("Previous operation in progress now..");
-//        msgBox.setInformativeText("Do you want to interrupt operation?");
-//        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No |
-//                                  QMessageBox::Cancel);
-//        msgBox.setDefaultButton(QMessageBox::Cancel);
-////        int ret = msgBox.exec();
-//        msgBox.show();
-
-//        switch (ret) {
-//            case QMessageBox::Yes:
-//                // Save was clicked
-//                break;
-//            case QMessageBox::No:
-//                // Don't Save was clicked
-//                break;
-//            case QMessageBox::Cancel:
-//                // Cancel was clicked
-//                break;
-//            default:
-//                // should never be reached
-//                break;
-//        }
-
         int numFiles = 5;
-        QProgressDialog progress("Copying files...", "Abort Copy", 0, numFiles,
-                                 QApplication::topLevelWidgets().at(0));
+        QProgressDialog progress("The treatment is the previous query...",
+                                 "Cancel", 0, 100,
+                                 qobject_cast<QWidget *>(parent()));
+
         progress.setWindowModality(Qt::WindowModal);
 
         for (int i = 0; i < numFiles; i++) {
-            sleep (1);
+
             progress.setValue(i);
 
             if (progress.wasCanceled())
                 break;
             //... copy one file
         }
+
         progress.setValue(numFiles);
     }
 }
@@ -81,14 +62,19 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
 void StatGetter::InitThread()
 {
     qDebug() << "init thread";
+    percentOfWorkDone_ = 0;
+    running_ = false;
     StatGetterThread* worker = new StatGetterThread;
     worker->moveToThread(&workerThread_);
     connect(&workerThread_, &QThread::finished, worker, &QObject::deleteLater);
     connect(this, &StatGetter::operate, worker, &StatGetterThread::doWork);
-    connect(worker, &StatGetterThread::resultReady, this, &StatGetter::handleResults);
+    connect(worker, &StatGetterThread::resultReady, this,
+            &StatGetter::handleResults);
+    //TODO: привязать к прогресс бару основного окна
+    connect(worker, &StatGetterThread::percetnOfWorkDone, this,
+            &StatGetter::setWorkDonePercentage);
     workerThread_.start();
     qDebug() << "thread start";
-    running_ = false;
 }
 
 void StatGetter::RemoveThread()

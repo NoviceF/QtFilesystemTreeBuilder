@@ -11,6 +11,7 @@ class StatGetterThread : public QObject
 
 public slots:
     void doWork(const QString& parameter);
+    void percetnOfWorkDone(const int percent);
 
     signals:
     void resultReady(const QString &result);
@@ -33,35 +34,14 @@ private:
     QTableView* tableView_;
     QThread workerThread_;
     bool running_;
+    int percentOfWorkDone_;
 
 signals:
     void operate(const QString& );
 
 public slots:
     void handleResults(const QString& result);
+    void setWorkDonePercentage(const int);
 };
-
-//class Controller : public QObject
-//{
-//    Q_OBJECT
-//    QThread workerThread;
-//public:
-//    Controller() {
-//        StatGetterThread *worker = new StatGetterThread;
-//        worker->moveToThread(&workerThread);
-//        connect(&workerThread, &QThread::finished, worker, &QObject::deleteLater);
-//        connect(this, &Controller::operate, worker, &StatGetterThread::doWork);
-//        connect(worker, &StatGetterThread::resultReady, this, &Controller::handleResults);
-//        workerThread.start();
-//    }
-//    ~Controller() {
-//        workerThread.quit();
-//        workerThread.wait();
-//    }
-//public slots:
-//    void handleResults(const QString &);
-//signals:
-//    void operate(const QString &);
-//};
 
 #endif // STATGETTER_H
