@@ -36,19 +36,20 @@ private:
     void InitThread();
     void RemoveThread();
 
+signals:
+    void operate(const QString& );
+    void workDoneStatus(int);
+    void closeMsgBox();
+
+public slots:
+    void handleResults(const QString& result);
+    void workDonePercentageHandler(int percent);
+
 private:
     QTableView* tableView_;
     QThread workerThread_;
     bool running_;
     int percentOfWorkDone_;
-
-signals:
-    void operate(const QString& );
-    void workDoneStatus(int);
-
-public slots:
-    void handleResults(const QString& result);
-    void workDonePercentageHandler(int percent);
 };
 
 #endif // STATGETTER_H

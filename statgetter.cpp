@@ -1,8 +1,7 @@
-﻿#include <QDebug>
-#include <QString>
+﻿#include <QApplication>
+#include <QDebug>
 #include <QMessageBox>
-#include <QDialog>
-#include <QApplication>
+#include <QString>
 #include <QWidget>
 
 #include <unistd.h>
@@ -24,7 +23,7 @@ void StatGetterThread::doWork(const QString& parameter)
     {
         percentOfWorkDone_ = percentOfWorkDone_ + 20;
         emit percetnOfWorkDone(percentOfWorkDone_);
-        sleep(1);
+        sleep(2);
     }
 
     emit resultReady(result);
@@ -60,7 +59,8 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     {
         qDebug() << "thread already running";
         // диалог
-            QMessageBox msgBox;
+        QMessageBox msgBox;
+        connect(this, &StatGetter::closeMsgBox, &msgBox, &QMessageBox::close);
         msgBox.setIcon(QMessageBox::Question);
         msgBox.setText("Previous operation in progress now..");
         msgBox.setInformativeText("Do you want to interrupt operation?");
@@ -131,8 +131,10 @@ void StatGetter::workDonePercentageHandler(int percent)
     else
     {
         emit(workDoneStatus(percent));
-    }
 
+        if (percent == 100)
+            emit closeMsgBox();
+    }
 }
 
 

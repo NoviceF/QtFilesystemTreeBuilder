@@ -34,6 +34,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_->progressBar->setMinimum(0);
     ui_->progressBar->setMaximum(100);
     ui_->progressBar->setValue(0);
+    //TODO: при 100% нужно закрывать диалог messagebox из statgetter
     connect(statGetter_, &StatGetter::workDoneStatus, ui_->progressBar,
             &QProgressBar::setValue);
 }
