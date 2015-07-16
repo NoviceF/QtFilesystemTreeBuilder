@@ -34,7 +34,6 @@ private:
 private:
     Ui::MainWindow* ui_;
     QFileSystemModel* dirModel_;
-    QFileSystemModel* fileModel_;
     StatGetter* statGetter_;
 };
 

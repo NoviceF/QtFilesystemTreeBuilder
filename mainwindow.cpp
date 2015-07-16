@@ -8,7 +8,6 @@ MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
     dirModel_(new QFileSystemModel(this)),
-    fileModel_(new QFileSystemModel(this)),
     statGetter_(new StatGetter(ui_->tableView, this))
 {
     SetPositionCenter();
@@ -16,26 +15,21 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_->setupUi(this);
 
     QFileSystemModel* model = new QFileSystemModel(this);
-    // TODO: check on windows
-    model->setFilter(QDir::Drives);
-    model->setRootPath("/");
-    //model->setFilter(QDir::AllEntries);
-    //model->setRootPath("/home/novice");
-    ui_->comboBox->setModel(model);
-    ui_->comboBox->repaint();
 
-    //dirModel_->setRootPath(initPath);
-    dirModel_->setRootPath("/");
+    model->setFilter(QDir::Drives);
+    model->setRootPath("");
+    ui_->comboBox->setModel(model);
+    ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    ui_->comboBox->setCurrentIndex(0);
+//    ui_->comboBox->activated("");
+
     dirModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     ui_->treeView->setModel(dirModel_);
-
-//    fileModel_->setFilter(QDir::Files | QDir::NoDotAndDotDot);
-//    ui_->tableView->setModel(fileModel_);
 
     ui_->progressBar->setMinimum(0);
     ui_->progressBar->setMaximum(100);
     ui_->progressBar->setValue(0);
-    //TODO: при 100% нужно закрывать диалог messagebox из statgetter
+
     connect(statGetter_, &StatGetter::workDoneStatus, ui_->progressBar,
             &QProgressBar::setValue);
 }
