@@ -23,17 +23,14 @@ public:
 
 private slots:
     void on_comboBox_activated(const QString &arg2);
-
-    void on_comboBox_currentIndexChanged(const QString &arg1);
-
-    void on_treeView_clicked(const QModelIndex &rootPath);
+    void setTreeRootIndex(int& index);
 
 private:
     void SetPositionCenter();
 
 private:
     Ui::MainWindow* ui_;
-    QFileSystemModel* dirModel_;
+    QFileSystemModel* fsModel_;
     StatGetter* statGetter_;
 };
 
