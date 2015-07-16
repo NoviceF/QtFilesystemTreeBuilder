@@ -18,18 +18,19 @@ MainWindow::MainWindow(QWidget *parent) :
     QFileSystemModel* model = new QFileSystemModel(this);
     // TODO: check on windows
     model->setFilter(QDir::Drives);
+    model->setRootPath("/");
     //model->setFilter(QDir::AllEntries);
     //model->setRootPath("/home/novice");
-//    model->
     ui_->comboBox->setModel(model);
+    ui_->comboBox->repaint();
 
     //dirModel_->setRootPath(initPath);
+    dirModel_->setRootPath("/");
     dirModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     ui_->treeView->setModel(dirModel_);
 
-
-    fileModel_->setFilter(QDir::Files | QDir::NoDotAndDotDot);
-    ui_->tableView->setModel(fileModel_);
+//    fileModel_->setFilter(QDir::Files | QDir::NoDotAndDotDot);
+//    ui_->tableView->setModel(fileModel_);
 
     ui_->progressBar->setMinimum(0);
     ui_->progressBar->setMaximum(100);
