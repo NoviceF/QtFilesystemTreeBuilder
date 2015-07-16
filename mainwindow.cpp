@@ -1,14 +1,77 @@
+﻿#include <QDebug>
+#include <QDesktopWidget>
+
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::MainWindow)
+    ui_(new Ui::MainWindow),
+    dirModel_(new QFileSystemModel(this)),
+    statGetter_(new StatGetter(ui_->tableView, this))
 {
-    ui->setupUi(this);
+    SetPositionCenter();
+
+    ui_->setupUi(this);
+
+    QFileSystemModel* model = new QFileSystemModel(this);
+
+//    model->setFilter(QDir::Drives);
+    model->setRootPath("");
+    ui_->comboBox->setModel(model);
+    ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    ui_->comboBox->setCurrentIndex(0);
+//    ui_->comboBox->activated("");
+
+    dirModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+//    dirModel_->setRootPath("c:\\");
+    ui_->treeView->setModel(dirModel_);
+
+    ui_->progressBar->setMinimum(0);
+    ui_->progressBar->setMaximum(100);
+    ui_->progressBar->setValue(0);
+
+    connect(statGetter_, &StatGetter::workDoneStatus, ui_->progressBar,
+            &QProgressBar::setValue);
 }
 
 MainWindow::~MainWindow()
 {
-    delete ui;
+    delete ui_;
+}
+
+void MainWindow::SetPositionCenter()
+{
+    if(this->isFullScreen())
+        return;
+
+    const QSize size = this->size();
+
+    QDesktopWidget* desktop = QApplication::desktop();
+    const int screenWidth = desktop->width();   // returns screen width
+    const int screenHeight = desktop->height();  // returns screen height
+    const int mainWidth = size.width();
+    const int mainHeight = size.height();
+    const int widthPos = (screenWidth/2) - (mainWidth/2);
+    const int heightPos = (screenHeight/2) - (mainHeight/2);
+
+    this->move(widthPos,heightPos);
+}
+
+
+void MainWindow::on_comboBox_activated(const QString& arg1)
+{
+    dirModel_->setRootPath(arg1);
+}
+
+void MainWindow::on_comboBox_currentIndexChanged(const QString& arg1)
+{
+    dirModel_->setRootPath(arg1);
+}
+
+void MainWindow::on_treeView_clicked(const QModelIndex& index)
+{
+    qDebug() << "on_treeView_clicked";
+    const QString selectedPath = dirModel_->fileInfo(index).absoluteFilePath();
+    statGetter_->GetStatsForPath(selectedPath);
 }

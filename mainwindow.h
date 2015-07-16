@@ -1,7 +1,13 @@
-#ifndef MAINWINDOW_H
+﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFileSystemModel>
+#include <QTreeView>
+#include <QListView>
+#include <QString>
+
+#include <statgetter.h>
 
 namespace Ui {
 class MainWindow;
@@ -15,8 +21,20 @@ public:
     explicit MainWindow(QWidget *parent = 0);
     ~MainWindow();
 
+private slots:
+    void on_comboBox_activated(const QString &arg2);
+
+    void on_comboBox_currentIndexChanged(const QString &arg1);
+
+    void on_treeView_clicked(const QModelIndex &rootPath);
+
 private:
-    Ui::MainWindow *ui;
+    void SetPositionCenter();
+
+private:
+    Ui::MainWindow* ui_;
+    QFileSystemModel* dirModel_;
+    StatGetter* statGetter_;
 };
 
 #endif // MAINWINDOW_H
