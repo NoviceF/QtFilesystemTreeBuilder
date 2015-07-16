@@ -7,6 +7,7 @@
 #include <unistd.h>
 
 #include "statgetter.h"
+#include <filetreeanalyzer.h>
 
 StatGetterThread::StatGetterThread() :
     percentOfWorkDone_(0)
@@ -18,6 +19,8 @@ void StatGetterThread::doWork(const QString& parameter)
 {
     QString result (parameter);
     qDebug() << "do calculation in thread";
+
+    FileTreeAnalyzer analyzer(parameter);
 
     for (int i = 0; i < 5; ++i)
     {
