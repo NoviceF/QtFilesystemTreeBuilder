@@ -16,7 +16,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QFileSystemModel* model = new QFileSystemModel(this);
 
-    model->setFilter(QDir::Drives);
+//    model->setFilter(QDir::Drives);
     model->setRootPath("");
     ui_->comboBox->setModel(model);
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -24,6 +24,7 @@ MainWindow::MainWindow(QWidget *parent) :
 //    ui_->comboBox->activated("");
 
     dirModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+//    dirModel_->setRootPath("c:\\");
     ui_->treeView->setModel(dirModel_);
 
     ui_->progressBar->setMinimum(0);
