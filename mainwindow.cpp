@@ -18,6 +18,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //    model->setFilter(QDir::Drives);
 //    model->setRootPath("");
+//    const QString selectedPath("/home/novice/proj/cpp/dirtest");
 //    fsModel_->setRootPath(selectedPath);
 
     connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
@@ -47,7 +48,7 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::setTreeRootIndex(int)
+void MainWindow::setTreeRootIndex(int index)
 {
     //TODO: проверить под виндой
     const QString itemName = ui_->comboBox->currentText();
@@ -55,8 +56,16 @@ void MainWindow::setTreeRootIndex(int)
 
     QDir::toNativeSeparators(selectedPath);
     QDir selectedDir(selectedPath);
-    ui_->treeView->setRootIndex(fsModel_->index(selectedDir.absolutePath()));
-    ui_->treeView->setCurrentIndex(fsModel_->index(selectedDir.absolutePath()));
+    ui_->treeView->setModel(fsModel_);
+//    ui_->treeView->setRootIndex(fsModel_->index(selectedDir.absolutePath()));
+
+    QModelIndex fsIndex = fsModel_->index(selectedDir.absolutePath());
+    //TODO: правильно расположить слэши
+    if(fsModel_->canFetchMore(fsIndex))
+    // make sure the entries in the dir are loaded
+    fsModel_->fetchMore(fsIndex);
+
+    ui_->treeView->setCurrentIndex(fsIndex);
 }
 
 void MainWindow::SetPositionCenter()
