@@ -45,15 +45,22 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::setTreeRootIndex(int index)
+void MainWindow::setTreeRootIndex(int)
 {
-    //TODO: правильно расположить слэши
+
     const QString itemName = ui_->comboBox->currentText();
     const QString selectedPath(fsModel_->rootPath() + "/" + itemName);
     QDir selectedDir(selectedPath);
     ui_->treeView->setModel(fsModel_);
 //    ui_->treeView->setRootIndex(fsModel_->index(selectedDir.absolutePath()));
-    ui_->treeView->setCurrentIndex(fsModel_->index(selectedDir.absolutePath()));
+
+    QModelIndex fsIndex = fsModel_->index(selectedDir.absolutePath());
+    //TODO: правильно расположить слэши
+    if(fsModel_->canFetchMore(fsIndex))
+    // make sure the entries in the dir are loaded
+    fsModel_->fetchMore(fsIndex);
+
+    ui_->treeView->setCurrentIndex(fsIndex);
 }
 
 void MainWindow::SetPositionCenter()
