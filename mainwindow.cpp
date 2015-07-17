@@ -18,19 +18,21 @@ MainWindow::MainWindow(QWidget *parent) :
 
 //    model->setFilter(QDir::Drives);
 //    model->setRootPath("");
-//    const QString selectedPath("/home/novice/proj/cpp/dirtest");
 //    fsModel_->setRootPath(selectedPath);
 
     connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
             SLOT(setTreeRootIndex(int)));
 
-    QString selectedPath("d:\\tmp");
+//    QString selectedPath("d:\\tmp");
+    const QString selectedPath("/home/novice/proj/cpp/dirtest");
     fsModel_->setRootPath(selectedPath);
     fsModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     ui_->comboBox->setModel(fsModel_);
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    ui_->comboBox->setRootModelIndex(fsModel_->index(selectedPath));
+    ui_->comboBox->setRootModelIndex(fsModel_->index(fsModel_->rootPath()));
     ui_->comboBox->setCurrentIndex(0);
+
+    ui_->treeView->setModel(fsModel_);
 
     ui_->progressBar->setMinimum(0);
     ui_->progressBar->setMaximum(100);
@@ -45,14 +47,14 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::setTreeRootIndex(int index)
+void MainWindow::setTreeRootIndex(int)
 {
     //TODO: правильно расположить слэши
     const QString itemName = ui_->comboBox->currentText();
     const QString selectedPath(fsModel_->rootPath() + "/" + itemName);
+
     QDir selectedDir(selectedPath);
-    ui_->treeView->setModel(fsModel_);
-//    ui_->treeView->setRootIndex(fsModel_->index(selectedDir.absolutePath()));
+    ui_->treeView->setRootIndex(fsModel_->index(selectedDir.absolutePath()));
     ui_->treeView->setCurrentIndex(fsModel_->index(selectedDir.absolutePath()));
 }
 
