@@ -22,8 +22,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_comboBox_activated(const QString &arg2);
-    void setTreeRootIndex(int& index);
+    void setTreeRootIndex(int index);
 
 private:
     void SetPositionCenter();
