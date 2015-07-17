@@ -49,10 +49,11 @@ MainWindow::~MainWindow()
 
 void MainWindow::setTreeRootIndex(int)
 {
-    //TODO: правильно расположить слэши
+    //TODO: проверить под виндой
     const QString itemName = ui_->comboBox->currentText();
     const QString selectedPath(fsModel_->rootPath() + "/" + itemName);
 
+    QDir::toNativeSeparators(selectedPath);
     QDir selectedDir(selectedPath);
     ui_->treeView->setRootIndex(fsModel_->index(selectedDir.absolutePath()));
     ui_->treeView->setCurrentIndex(fsModel_->index(selectedDir.absolutePath()));
