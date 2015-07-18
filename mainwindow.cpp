@@ -16,20 +16,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     SetPositionCenter();
 
-//    QFileSystemModel* model = new QFileSystemModel(this);
-
-//    model->setFilter(QDir::Drives);
-//    model->setRootPath("");
-//    const QString selectedPath("/home/novice/proj/cpp/dirtest");
-//    fsModel_->setRootPath(selectedPath);
-
     connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
             SLOT(setTreeRootIndex(int)));
 
 //    QString selectedPath("d:\\tmp");
+//    QString selectedPath("");
     const QString selectedPath("/home/novice/proj/cpp/dirtest");
+
     fsModel_->setRootPath(selectedPath);
+    fsModel_->setFilter(QDir::Drives);
     fsModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+
     ui_->comboBox->setModel(fsModel_);
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     ui_->comboBox->setRootModelIndex(fsModel_->index(fsModel_->rootPath()));
@@ -41,8 +38,8 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_->progressBar->setMaximum(100);
     ui_->progressBar->setValue(0);
 
-    connect(statGetter_, &StatGetter::workDoneStatus, ui_->progressBar,
-            &QProgressBar::setValue);
+    connect(statGetter_, SIGNAL(workDoneStatus(int)), ui_->progressBar,
+            SLOT(setValue(int)));
 }
 
 MainWindow::~MainWindow()
@@ -50,34 +47,16 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::setTreeRootIndex(int index)
+void MainWindow::setTreeRootIndex(int)
 {
-    assert(ui_->comboBox->currentIndex() == index);
-
-//    const int row = index;
-//    const int column = ui_->comboBox->modelColumn();
-//    QModelIndex selectedDirIndex = fsModel_->index(row, column, fsModel_->index(fsModel_->rootPath()).parent());
-//    QModelIndex selectedDirIndex = fsModel_->index(row, column, fsModel_->index(fsModel_->rootPath()));
-
-    //TODO: проверить под виндой
     const QString itemName = ui_->comboBox->currentText();
     const QString selectedPath(fsModel_->rootPath() + "/" + itemName);
-
+    //TODO: проверить под виндой
     QDir::toNativeSeparators(selectedPath);
     QDir selectedDir(selectedPath);
 
     QModelIndex fsIndex = fsModel_->index(selectedDir.absolutePath());
 
-    assert(selectedDirIndex == fsIndex);
-//    const int fsRow = fsIndex.row();
-//    const int fsCol = fsIndex.column();
-//    selectedDirIndex = fsModel_->index(fsRow, fsCol);
-//    fsIndex = selectedDirIndex;
-
-
-    //TODO: проверить, что приходит, когда индекс получается через путь
-//    QModelIndex fsIndex = selectedDirIndex;
-    //TODO: правильно расположить слэши
     if(fsModel_->canFetchMore(fsIndex))
     // make sure the entries in the dir are loaded
     fsModel_->fetchMore(fsIndex);
@@ -103,13 +82,3 @@ void MainWindow::SetPositionCenter()
 
     this->move(widthPos,heightPos);
 }
-
-//    ui_->treeView->setRootIndex(fsModel_->index(QDir::absoluteFilePath(arg1)));
-
-
-//void MainWindow::on_treeView_clicked(const QModelIndex& index)
-//{
-//    qDebug() << "on_treeView_clicked";
-//    const QString selectedPath = fsModel_->fileInfo(index).absoluteFilePath();
-//    statGetter_->GetStatsForPath(selectedPath);
-//}
