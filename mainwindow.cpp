@@ -1,4 +1,6 @@
-﻿#include <QDebug>
+﻿#include <cassert>
+
+#include <QDebug>
 #include <QDesktopWidget>
 
 #include "mainwindow.h"
@@ -50,21 +52,37 @@ MainWindow::~MainWindow()
 
 void MainWindow::setTreeRootIndex(int index)
 {
+    assert(ui_->comboBox->currentIndex() == index);
+
+//    const int row = index;
+//    const int column = ui_->comboBox->modelColumn();
+//    QModelIndex selectedDirIndex = fsModel_->index(row, column, fsModel_->index(fsModel_->rootPath()).parent());
+//    QModelIndex selectedDirIndex = fsModel_->index(row, column, fsModel_->index(fsModel_->rootPath()));
+
     //TODO: проверить под виндой
     const QString itemName = ui_->comboBox->currentText();
     const QString selectedPath(fsModel_->rootPath() + "/" + itemName);
 
     QDir::toNativeSeparators(selectedPath);
     QDir selectedDir(selectedPath);
-    ui_->treeView->setModel(fsModel_);
-//    ui_->treeView->setRootIndex(fsModel_->index(selectedDir.absolutePath()));
 
     QModelIndex fsIndex = fsModel_->index(selectedDir.absolutePath());
+
+    assert(selectedDirIndex == fsIndex);
+//    const int fsRow = fsIndex.row();
+//    const int fsCol = fsIndex.column();
+//    selectedDirIndex = fsModel_->index(fsRow, fsCol);
+//    fsIndex = selectedDirIndex;
+
+
+    //TODO: проверить, что приходит, когда индекс получается через путь
+//    QModelIndex fsIndex = selectedDirIndex;
     //TODO: правильно расположить слэши
     if(fsModel_->canFetchMore(fsIndex))
     // make sure the entries in the dir are loaded
     fsModel_->fetchMore(fsIndex);
 
+    ui_->treeView->setRootIndex(fsIndex);
     ui_->treeView->setCurrentIndex(fsIndex);
 }
 

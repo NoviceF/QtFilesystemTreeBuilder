@@ -22,7 +22,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void setTreeRootIndex(int);
+    void setTreeRootIndex(int index);
 
 private:
     void SetPositionCenter();
