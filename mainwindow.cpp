@@ -20,6 +20,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
             SLOT(setTreeRootIndex(int)));
 
+    connect(statGetter_, SIGNAL(workDoneStatus(int)), this,
+            SLOT(processProgressBar(int)));
+
+    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
+            SLOT(processStatRequest(QModelIndex)));
+
 //    QString selectedPath("d:\\tmp");
 //    QString selectedPath("");
     const QString selectedPath("/home/novice/proj/cpp/dirtest");
@@ -44,12 +50,6 @@ MainWindow::MainWindow(QWidget *parent) :
 
     statusBar()->addWidget(progBar, 1);
     progBar->hide();
-
-    connect(statGetter_, &StatGetter::workDoneStatus, progBar,
-            &QProgressBar::setValue);
-
-	connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
-            SLOT(processStatRequest(QModelIndex)));
 }
 
 MainWindow::~MainWindow()
@@ -67,24 +67,53 @@ void MainWindow::setTreeRootIndex(int index)
     QDir::toNativeSeparators(selectedPath);
     QDir selectedDir(selectedPath);
 
+    // когда в комбобоксе не выбрана никакая директорая currentIndex возвращает
+    // слэш, который игнорируется при создании QDir
+    if (selectedDir.path() != selectedPath)
+        return;
+
     QModelIndex fsIndex = fsModel_->index(selectedDir.absolutePath());
 
-    if(fsModel_->canFetchMore(fsIndex))
-    // make sure the entries in the dir are loaded
-    fsModel_->fetchMore(fsIndex);
+    if (fsModel_->canFetchMore(fsIndex))
+    {
+        // make sure the entries in the dir are loaded
+        fsModel_->fetchMore(fsIndex);
+    }
 
     ui_->treeView->setRootIndex(fsIndex);
     ui_->treeView->setCurrentIndex(fsIndex);
 }
 
-void MainWindow::processStatRequest(QModelIndex index)
+void MainWindow::processStatRequest(const QModelIndex& index)
 {
+//    qDebug() << "processStatRequest";
+    const QString selectedPath = fsModel_->fileInfo(index).absoluteFilePath();
+    statGetter_->GetStatsForPath(selectedPath);
+}
 
+void MainWindow::processProgressBar(int status)
+{
+    QProgressBar* progBar = statusBar()->findChild<QProgressBar*>("");
+
+    if (status == -1)
+    {
+        progBar->hide();
+        progBar->setValue(0);
+    }
+    else
+    {
+        progBar->setValue(status);
+
+        if (progBar->isHidden())
+        {
+            progBar->show();
+        }
+    }
 }
 
 void MainWindow::SetPositionCenter()
 {
-    if(this->isFullScreen())
+    if (this->isFullScreen())
         return;
 
     const QSize size = this->size();
@@ -100,9 +129,3 @@ void MainWindow::SetPositionCenter()
     this->move(widthPos,heightPos);
 }
 
-//void MainWindow::on_treeView_clicked(const QModelIndex& index)
-//{
-//    qDebug() << "on_treeView_clicked";
-//    const QString selectedPath = fsModel_->fileInfo(index).absoluteFilePath();
-//    statGetter_->GetStatsForPath(selectedPath);
-//}

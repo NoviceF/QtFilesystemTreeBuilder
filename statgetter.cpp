@@ -18,9 +18,9 @@ StatGetterThread::StatGetterThread() :
 void StatGetterThread::doWork(const QString& parameter)
 {
     QString result (parameter);
-    qDebug() << "do calculation in thread";
+//    qDebug() << "do calculation in thread";
 
-    FileTreeAnalyzer analyzer(parameter);
+//    FileTreeAnalyzer analyzer(parameter);
 
     for (int i = 0; i < 5; ++i)
     {
@@ -55,12 +55,12 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     {
         InitThread();
         running_ = true;
-        qDebug() << "send job to thread";
+//        qDebug() << "send job to thread";
         emit operate(rootPath);
     }
     else
     {
-        qDebug() << "thread already running";
+//        qDebug() << "thread already running";
         // диалог
         QMessageBox msgBox;
         connect(this, &StatGetter::closeMsgBox, &msgBox, &QMessageBox::close);
@@ -91,7 +91,7 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
 
 void StatGetter::InitThread()
 {
-    qDebug() << "init thread";
+//    qDebug() << "init thread";
     running_ = false;
 
     StatGetterThread* worker = new StatGetterThread;
@@ -107,12 +107,12 @@ void StatGetter::InitThread()
             &StatGetter::workDonePercentageHandler);
 
     workerThread_.start();
-    qDebug() << "thread start";
+//    qDebug() << "thread start";
 }
 
 void StatGetter::RemoveThread()
 {
-    qDebug() << "remove thread";
+//    qDebug() << "remove thread";
     running_ = false;
     workerThread_.quit();
 //    workerThread_.wait();
@@ -120,7 +120,7 @@ void StatGetter::RemoveThread()
 
 void StatGetter::handleResults(const QString& result)
 {
-    qDebug() << "get thread result" << result;
+//    qDebug() << "get thread result" << result;
     RemoveThread();
 }
 
@@ -129,14 +129,19 @@ void StatGetter::workDonePercentageHandler(int percent)
     if (percent < 0 || percent > 100)
     {
         RemoveThread();
-        emit(workDoneStatus(0));
+        emit(workDoneStatus(-1));
     }
     else
     {
-        emit(workDoneStatus(percent));
-
         if (percent == 100)
+        {
             emit closeMsgBox();
+            emit workDoneStatus(-1);
+        }
+        else
+        {
+            emit(workDoneStatus(percent));
+        }
     }
 }
 
