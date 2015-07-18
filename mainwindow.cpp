@@ -2,6 +2,7 @@
 
 #include <QDebug>
 #include <QDesktopWidget>
+#include <QProgressBar>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -34,14 +35,20 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui_->treeView->setModel(fsModel_);
 
-    ui_->progressBar->setMinimum(0);
-    ui_->progressBar->setMaximum(100);
-    ui_->progressBar->setValue(0);
+    QProgressBar* progBar = new QProgressBar;
 
-    connect(statGetter_, SIGNAL(workDoneStatus(int)), ui_->progressBar,
-            SLOT(setValue(int)));
+    progBar->setMinimum(0);
+    progBar->setMaximum(100);
+    progBar->setValue(0);
+    progBar->setAlignment(Qt::AlignRight);
 
-    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
+    statusBar()->addWidget(progBar, 1);
+    progBar->hide();
+
+    connect(statGetter_, &StatGetter::workDoneStatus, progBar,
+            &QProgressBar::setValue);
+
+	connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
             SLOT(processStatRequest(QModelIndex)));
 }
 
@@ -50,8 +57,10 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::setTreeRootIndex(int)
+void MainWindow::setTreeRootIndex(int index)
 {
+    assert(ui_->comboBox->currentIndex() == index);
+
     const QString itemName = ui_->comboBox->currentText();
     const QString selectedPath(fsModel_->rootPath() + "/" + itemName);
     //TODO: проверить под виндой
@@ -90,3 +99,10 @@ void MainWindow::SetPositionCenter()
 
     this->move(widthPos,heightPos);
 }
+
+//void MainWindow::on_treeView_clicked(const QModelIndex& index)
+//{
+//    qDebug() << "on_treeView_clicked";
+//    const QString selectedPath = fsModel_->fileInfo(index).absoluteFilePath();
+//    statGetter_->GetStatsForPath(selectedPath);
+//}
