@@ -68,6 +68,11 @@ void MainWindow::setTreeRootIndex(int)
     ui_->treeView->setCurrentIndex(fsIndex);
 }
 
+void MainWindow::processStatRequest(QModelIndex index)
+{
+
+}
+
 void MainWindow::SetPositionCenter()
 {
     if(this->isFullScreen())
