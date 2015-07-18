@@ -2,6 +2,8 @@
 
 #include <QDebug>
 #include <QDesktopWidget>
+#include <QHBoxLayout>
+#include <QProgressBar>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -37,11 +39,17 @@ MainWindow::MainWindow(QWidget *parent) :
 
     ui_->treeView->setModel(fsModel_);
 
-    ui_->progressBar->setMinimum(0);
-    ui_->progressBar->setMaximum(100);
-    ui_->progressBar->setValue(0);
+    QProgressBar* progBar = new QProgressBar;
 
-    connect(statGetter_, &StatGetter::workDoneStatus, ui_->progressBar,
+    progBar->setMinimum(0);
+    progBar->setMaximum(100);
+    progBar->setValue(0);
+    progBar->setAlignment(Qt::AlignRight);
+
+    statusBar()->addWidget(progBar, 1);
+    progBar->hide();
+
+    connect(statGetter_, &StatGetter::workDoneStatus, progBar,
             &QProgressBar::setValue);
 }
 
@@ -68,7 +76,7 @@ void MainWindow::setTreeRootIndex(int index)
 
     QModelIndex fsIndex = fsModel_->index(selectedDir.absolutePath());
 
-    assert(selectedDirIndex == fsIndex);
+//    assert(selectedDirIndex == fsIndex);
 //    const int fsRow = fsIndex.row();
 //    const int fsCol = fsIndex.column();
 //    selectedDirIndex = fsModel_->index(fsRow, fsCol);
