@@ -40,6 +40,9 @@ MainWindow::MainWindow(QWidget *parent) :
 
     connect(statGetter_, SIGNAL(workDoneStatus(int)), ui_->progressBar,
             SLOT(setValue(int)));
+
+    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
+            SLOT(processStatRequest(QModelIndex)));
 }
 
 MainWindow::~MainWindow()

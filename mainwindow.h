@@ -23,6 +23,7 @@ public:
 
 private slots:
     void setTreeRootIndex(int);
+    void processStatRequest(QModelIndex index);
 
 private:
     void SetPositionCenter();
