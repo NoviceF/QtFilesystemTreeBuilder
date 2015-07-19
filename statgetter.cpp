@@ -20,14 +20,14 @@ void StatGetterThread::doWork(const QString& parameter)
     QString result (parameter);
 //    qDebug() << "do calculation in thread";
 
-//    FileTreeAnalyzer analyzer(parameter);
+    FileTreeAnalyzer analyzer(parameter);
 
-    for (int i = 0; i < 5; ++i)
-    {
+//    for (int i = 0; i < 5; ++i)
+//    {
         percentOfWorkDone_ = percentOfWorkDone_ + 20;
         emit percetnOfWorkDone(percentOfWorkDone_);
-        sleep(2);
-    }
+//        sleep(2);
+//    }
 
     emit resultReady(result);
     emit percetnOfWorkDone(percentOfWorkDone_);
@@ -126,7 +126,7 @@ void StatGetter::handleResults(const QString& result)
 
 void StatGetter::workDonePercentageHandler(int percent)
 {
-    const QString msg("filesystem tree building in process..");
+    const QString msg("processing of statistics..");
 
     if (percent < 0 || percent > 100)
     {

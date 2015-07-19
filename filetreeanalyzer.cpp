@@ -53,6 +53,8 @@ size_t FileTreeAnalyzer::GetSubdirsCount()
 FileTreeAnalyzer::fstree_t FileTreeAnalyzer::GetTreeFilledByRoot()
 {
     assert(QDir::isAbsolutePath(root_));
+    assert(!root_.isEmpty());
+
     QDir root(root_);
 
     root.setFilter(QDir::Files);
@@ -64,6 +66,8 @@ FileTreeAnalyzer::fstree_t FileTreeAnalyzer::GetTreeFilledByRoot()
     }
 
     fstree_t result;
+
+    return result;
 }
 
 
