@@ -47,17 +47,17 @@ size_t FileTreeAnalyzer::GetAvgFilesSize() const
 
 }
 
-size_t FileTreeAnalyzer::GetTotalGroupCount(const QString& groupName) const
+size_t FileTreeAnalyzer::GetTotalGroupFilesCount(const QString& groupName) const
 {
 
 }
 
-size_t FileTreeAnalyzer::GetTotalGroupSize(const QString& groupName) const
+size_t FileTreeAnalyzer::GetTotalGroupFilesSize(const QString& groupName) const
 {
 
 }
 
-size_t FileTreeAnalyzer::GetAvgGroupSize(const QString& groupName) const
+size_t FileTreeAnalyzer::GetAvgGroupFilesSize(const QString& groupName) const
 {
 
 }
@@ -66,12 +66,6 @@ size_t FileTreeAnalyzer::GetSubdirsCount()
 {
 
 }
-
-/*static*/ void FileTreeAnalyzer::FillTreeRecursive(const QString& rootPath,
-        FileTreeAnalyzer::fstree_t& fstree)
-{
-}
-
 
 FileTreeAnalyzer::fstree_t FileTreeAnalyzer::GetTreeFilledByRoot()
 {

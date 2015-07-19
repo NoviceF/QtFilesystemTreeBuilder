@@ -18,9 +18,9 @@ public:
     size_t GetTotalFilesSize() const;
     size_t GetAvgFilesSize() const;
 
-    size_t GetTotalGroupCount(const QString& groupName) const;
-    size_t GetTotalGroupSize(const QString& groupName) const;
-    size_t GetAvgGroupSize(const QString& groupName) const;
+    size_t GetTotalGroupFilesCount(const QString& groupName) const;
+    size_t GetTotalGroupFilesSize(const QString& groupName) const;
+    size_t GetAvgGroupFilesSize(const QString& groupName) const;
 
     size_t GetSubdirsCount();
 
