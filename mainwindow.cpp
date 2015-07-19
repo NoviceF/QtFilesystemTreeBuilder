@@ -1,4 +1,5 @@
 ﻿#include <cassert>
+#include <unistd.h>
 
 #include <QDebug>
 #include <QDesktopWidget>
@@ -20,19 +21,27 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
             SLOT(setTreeRootIndex(int)));
 
-    connect(statGetter_, SIGNAL(workDoneStatus(int)), this,
-            SLOT(processProgressBar(int)));
+    connect(statGetter_, SIGNAL(workDoneStatus(int,QString)), this,
+            SLOT(processProgressBar(int,QString)));
 
     connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
             SLOT(processStatRequest(QModelIndex)));
 
 //    QString selectedPath("d:\\tmp");
-//    QString selectedPath("");
+//     const QString selectedPath("");
+//     const QString selectedPath("/usr");
     const QString selectedPath("/home/novice/proj/cpp/dirtest");
 
-    fsModel_->setRootPath(selectedPath);
-    fsModel_->setFilter(QDir::Drives);
+//    fsModel_->setFilter(QDir::Drives);
     fsModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    fsModel_->setRootPath(selectedPath);
+
+    // TODO: Проверить на винде
+//    while (fsModel_->rowCount() == 0)
+//    {
+//        qDebug() << "cowCount = " << fsModel_->rowCount();
+//        sleep(2);
+//    }
 
     ui_->comboBox->setModel(fsModel_);
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
@@ -91,9 +100,11 @@ void MainWindow::processStatRequest(const QModelIndex& index)
     statGetter_->GetStatsForPath(selectedPath);
 }
 
-void MainWindow::processProgressBar(int status)
+void MainWindow::processProgressBar(int status, const QString& msg)
 {
     QProgressBar* progBar = statusBar()->findChild<QProgressBar*>("");
+    assert(progBar);
+    statusBar()->setToolTip(msg);
 
     if (status == -1)
     {

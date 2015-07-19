@@ -24,7 +24,7 @@ public:
 private slots:
     void setTreeRootIndex(int);
     void processStatRequest(const QModelIndex& index);
-    void processProgressBar(int status);
+    void processProgressBar(int status, const QString& msg);
 
 private:
     void SetPositionCenter();

@@ -49,43 +49,17 @@ StatGetter::~StatGetter()
 
 void StatGetter::GetStatsForPath(const QString& rootPath)
 {
-    QString path = rootPath;
-
     if (!running_)
     {
+        pathInWork_ = rootPath;
         InitThread();
         running_ = true;
 //        qDebug() << "send job to thread";
         emit operate(rootPath);
     }
-    else
+    else if (rootPath != pathInWork_)
     {
-//        qDebug() << "thread already running";
-        // диалог
-        QMessageBox msgBox;
-        connect(this, &StatGetter::closeMsgBox, &msgBox, &QMessageBox::close);
-        msgBox.setIcon(QMessageBox::Question);
-        msgBox.setText("Previous operation in progress now..");
-        msgBox.setInformativeText("Do you want to interrupt operation?");
-        msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-        msgBox.setDefaultButton(QMessageBox::Cancel);
-        int ret = msgBox.exec();
-
-        switch (ret)
-        {
-            case QMessageBox::Yes:
-                // Save was clicked
-                break;
-            case QMessageBox::No:
-                // Don't Save was clicked
-                break;
-            case QMessageBox::Cancel:
-                // Cancel was clicked
-                break;
-            default:
-                // should never be reached
-                break;
-        }
+        RiseMsgBox();
     }
 }
 
@@ -115,7 +89,33 @@ void StatGetter::RemoveThread()
 //    qDebug() << "remove thread";
     running_ = false;
     workerThread_.quit();
-//    workerThread_.wait();
+    //    workerThread_.wait();
+}
+
+void StatGetter::RiseMsgBox()
+{
+//        qDebug() << "thread already running";
+    QMessageBox msgBox;
+    connect(this, SIGNAL(closeMsgBox()), &msgBox, SLOT(close()));
+    msgBox.setIcon(QMessageBox::Question);
+    msgBox.setText("Previous operation in progress now..");
+    msgBox.setInformativeText("Do you want to interrupt operation?");
+    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
+    msgBox.setDefaultButton(QMessageBox::Cancel);
+    int ret = msgBox.exec();
+
+    switch (ret)
+    {
+        case QMessageBox::Yes:
+            // Save was clicked
+            break;
+        case QMessageBox::No:
+            // Don't Save was clicked
+            break;
+        default:
+            // should never be reached
+            break;
+    }
 }
 
 void StatGetter::handleResults(const QString& result)
@@ -126,21 +126,23 @@ void StatGetter::handleResults(const QString& result)
 
 void StatGetter::workDonePercentageHandler(int percent)
 {
+    const QString msg("filesystem tree in building process..");
+
     if (percent < 0 || percent > 100)
     {
         RemoveThread();
-        emit(workDoneStatus(-1));
+        emit(workDoneStatus(-1, msg));
     }
     else
     {
         if (percent == 100)
         {
             emit closeMsgBox();
-            emit workDoneStatus(-1);
+            emit workDoneStatus(-1, msg);
         }
         else
         {
-            emit(workDoneStatus(percent));
+            emit(workDoneStatus(percent, msg));
         }
     }
 }

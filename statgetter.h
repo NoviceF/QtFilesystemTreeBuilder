@@ -35,10 +35,11 @@ public:
 private:
     void InitThread();
     void RemoveThread();
+    void RiseMsgBox();
 
 signals:
     void operate(const QString& );
-    void workDoneStatus(int);
+    void workDoneStatus(int, const QString&);
     void closeMsgBox();
 
 public slots:
@@ -50,6 +51,7 @@ private:
     QThread workerThread_;
     bool running_;
     int percentOfWorkDone_;
+    QString pathInWork_;
 };
 
 #endif // STATGETTER_H
