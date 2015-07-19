@@ -57,6 +57,7 @@ MainWindow::MainWindow(QWidget *parent) :
     progBar->setValue(0);
     progBar->setAlignment(Qt::AlignRight);
 
+    statusBar()->addWidget(new QLabel, 1);
     statusBar()->addWidget(progBar, 1);
     progBar->hide();
 }
@@ -102,13 +103,15 @@ void MainWindow::processStatRequest(const QModelIndex& index)
 
 void MainWindow::processProgressBar(int status, const QString& msg)
 {
+    QLabel* label = statusBar()->findChild<QLabel*>("");
     QProgressBar* progBar = statusBar()->findChild<QProgressBar*>("");
     assert(progBar);
-    statusBar()->setToolTip(msg);
+    label->setText(msg);
 
     if (status == -1)
     {
         progBar->hide();
+        label->setText("");
         progBar->setValue(0);
     }
     else

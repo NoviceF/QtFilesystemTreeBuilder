@@ -126,7 +126,7 @@ void StatGetter::handleResults(const QString& result)
 
 void StatGetter::workDonePercentageHandler(int percent)
 {
-    const QString msg("filesystem tree in building process..");
+    const QString msg("filesystem tree building in process..");
 
     if (percent < 0 || percent > 100)
     {
