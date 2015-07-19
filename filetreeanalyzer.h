@@ -1,15 +1,16 @@
 ﻿#ifndef FILETREEANALYZER_H
 #define FILETREEANALYZER_H
 
+#include <map>
+
 #include <QDir>
-#include <QMap>
 #include <QString>
 #include <QVector>
 
 class FileTreeAnalyzer
 {
 public:
-    typedef QMap<QString,QVector<QString>> fstree_t;
+    typedef std::map<QString,QVector<QFileInfo>> fstree_t;
 
     FileTreeAnalyzer(const QString& root);
 
@@ -29,6 +30,8 @@ private:
 private:
     const QString root_;
     const fstree_t sortTree_;
+
+    mutable bool totalFilesSizeAlreadyCalculated;
 };
 
 

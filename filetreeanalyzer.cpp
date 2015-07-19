@@ -1,7 +1,7 @@
 ﻿#include <cassert>
 
 #include <QDebug>
-#include <QDir>
+#include <QDirIterator>
 
 #include "filetreeanalyzer.h"
 
@@ -17,12 +17,29 @@ FileTreeAnalyzer::FileTreeAnalyzer(const QString &root) :
 
 size_t FileTreeAnalyzer::GetTotalFilesCount() const
 {
+    size_t result = 0;
 
+    for (const auto& pair : sortTree_)
+    {
+        result += pair.second.count();
+    }
+
+    return result;
 }
 
 size_t FileTreeAnalyzer::GetTotalFilesSize() const
 {
+    size_t result = 0;
 
+    for (const auto& pair : sortTree_)
+    {
+        for (const QFileInfo& fileInfo : pair.second)
+        {
+            result += fileInfo.size();
+        }
+    }
+
+    return result;
 }
 
 size_t FileTreeAnalyzer::GetAvgFilesSize() const
@@ -50,22 +67,27 @@ size_t FileTreeAnalyzer::GetSubdirsCount()
 
 }
 
+/*static*/ void FileTreeAnalyzer::FillTreeRecursive(const QString& rootPath,
+        FileTreeAnalyzer::fstree_t& fstree)
+{
+}
+
+
 FileTreeAnalyzer::fstree_t FileTreeAnalyzer::GetTreeFilledByRoot()
 {
     assert(QDir::isAbsolutePath(root_));
     assert(!root_.isEmpty());
 
-    QDir root(root_);
-
-    root.setFilter(QDir::Files);
-    QStringList entryList = root.entryList();
-
-    for (auto entry : entryList)
-    {
-        qDebug() << "entry = " << entry;
-    }
-
     fstree_t result;
+
+    QDirIterator it(root_, QDirIterator::Subdirectories);
+
+    while (it.hasNext())
+    {
+//        qDebug() << "it next = " << it.next();
+        QFileInfo fileInfo(it.next());
+        result[fileInfo.suffix()].push_back(fileInfo);
+    }
 
     return result;
 }
