@@ -9,8 +9,15 @@
 
 class FileTreeAnalyzer
 {
+    struct GroupStats
+    {
+        const size_t size;
+        const size_t count;
+    };
+
 public:
     typedef std::map<QString,QVector<QFileInfo>> fstree_t;
+    typedef std::map<QString, GroupStats> stattree_t;
 
     FileTreeAnalyzer(const QString& root);
 
@@ -25,13 +32,20 @@ public:
     size_t GetSubdirsCount();
 
 private:
-    fstree_t GetTreeFilledByRoot();
+    stattree_t GetTreeFilledByRoot();
+
+    static size_t GetTotalFilesCount(const fstree_t& tree);
+    static size_t GetTotalFilesSize(const fstree_t& tree);
+
+    static size_t GetTotalGroupFilesCount(const QString& groupName,
+            const fstree_t& tree);
+    static size_t GetTotalGroupFilesSize(const QString& groupName,
+            const fstree_t& tree);
 
 private:
     const QString root_;
-    const fstree_t sortTree_;
+    const stattree_t sortTree_;
 
-    mutable bool totalFilesSizeAlreadyCalculated;
 };
 
 
