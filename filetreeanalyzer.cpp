@@ -9,7 +9,7 @@
 // использовать данный класс.
 FileTreeAnalyzer::FileTreeAnalyzer(const QString &root) :
     root_(root),
-    sortTree_(GetTreeFilledByRoot())
+    statTree_(GetTreeFilledByRoot())
 {
     assert(QDir::isAbsolutePath(root_));
 
@@ -85,7 +85,31 @@ FileTreeAnalyzer::stattree_t FileTreeAnalyzer::GetTreeFilledByRoot()
 
     stattree_t result;
 
+    for (auto pair : fsTree)
+    {
+        auto groupName = pair.first;
+        auto groupStats = pair.second;
+
+        const size_t elementsCount(GetTotalGroupFilesCount(groupName, groupStats));
+        const size_t groupSize(GetTotalGroupFilesSize(groupName, groupStats));
+        GroupStats stats = {elementsCount, groupSize};
+
+        result.insert(std::make_pair(groupName, stats));
+    }
+
     return result;
+}
+
+/*static*/ size_t FileTreeAnalyzer::GetTotalGroupFilesCount(const QString& groupName,
+    const FileTreeAnalyzer::infovec_t& tree)
+{
+
+}
+
+/*static*/ size_t FileTreeAnalyzer::GetTotalGroupFilesSize(const QString& groupName,
+    const FileTreeAnalyzer::infovec_t& tree)
+{
+
 }
 
 
