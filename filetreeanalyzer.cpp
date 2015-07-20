@@ -12,7 +12,6 @@ FileTreeAnalyzer::FileTreeAnalyzer(const QString &root) :
     statTree_(GetTreeFilledByRoot())
 {
     assert(QDir::isAbsolutePath(root_));
-
 }
 
 size_t FileTreeAnalyzer::GetTotalFilesCount() const
@@ -96,6 +95,13 @@ FileTreeAnalyzer::stattree_t FileTreeAnalyzer::GetTreeFilledByRoot()
 
         result.insert(std::make_pair(groupName, stats));
     }
+
+    for (auto node : result)
+    {
+        qDebug() << node.first;
+        qDebug() << "   " << node.second.count << " " << node.second.size;
+    }
+
 
     return result;
 }
