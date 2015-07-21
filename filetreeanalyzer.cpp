@@ -63,7 +63,9 @@ size_t FileTreeAnalyzer::GetAvgGroupFilesSize(const QString& groupName) const
 
 size_t FileTreeAnalyzer::GetSubdirsCount()
 {
-
+    QDir rootDir(root_);
+    rootDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    return rootDir.count();
 }
 
 FileTreeAnalyzer::stattree_t FileTreeAnalyzer::GetTreeFilledByRoot()
@@ -73,7 +75,8 @@ FileTreeAnalyzer::stattree_t FileTreeAnalyzer::GetTreeFilledByRoot()
 
     fstree_t fsTree;
 
-    QDirIterator it(root_, QDirIterator::Subdirectories);
+    QDirIterator it(root_, QStringList() << "*", QDir::Files,
+                    QDirIterator::Subdirectories);
 
     while (it.hasNext())
     {
@@ -102,20 +105,26 @@ FileTreeAnalyzer::stattree_t FileTreeAnalyzer::GetTreeFilledByRoot()
         qDebug() << "   " << node.second.count << " " << node.second.size;
     }
 
-
     return result;
 }
 
 /*static*/ size_t FileTreeAnalyzer::GetTotalGroupFilesCount(const QString& groupName,
-    const FileTreeAnalyzer::infovec_t& tree)
+    const FileTreeAnalyzer::infovec_t& infoList)
 {
-
+    return infoList.size();
 }
 
 /*static*/ size_t FileTreeAnalyzer::GetTotalGroupFilesSize(const QString& groupName,
-    const FileTreeAnalyzer::infovec_t& tree)
+    const FileTreeAnalyzer::infovec_t& infoList)
 {
+    size_t sum = 0;
 
+    for (const QFileInfo& fileInfo : infoList)
+    {
+        sum += fileInfo.size();
+    }
+
+    return sum;
 }
 
 

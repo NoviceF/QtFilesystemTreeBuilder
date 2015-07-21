@@ -39,13 +39,13 @@ private:
     size_t GetTotalFilesSize();
 
     static size_t GetTotalGroupFilesCount(const QString& groupName,
-            const infovec_t& tree);
+            const infovec_t& infoList);
     static size_t GetTotalGroupFilesSize(const QString& groupName,
-            const infovec_t& tree);
+            const infovec_t& infoList);
 
 private:
     const QString root_;
-    const stattree_t statTree_;
+    stattree_t statTree_;
 };
 
 

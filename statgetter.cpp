@@ -21,6 +21,7 @@ void StatGetterThread::doWork(const QString& parameter)
 //    qDebug() << "do calculation in thread";
 
     FileTreeAnalyzer analyzer(parameter);
+    qDebug() << "subdirs count = " <<  analyzer.GetSubdirsCount();
 
 //    for (int i = 0; i < 5; ++i)
 //    {
@@ -89,7 +90,7 @@ void StatGetter::RemoveThread()
 //    qDebug() << "remove thread";
     running_ = false;
     workerThread_.quit();
-    //    workerThread_.wait();
+//        workerThread_.wait();
 }
 
 void StatGetter::RiseMsgBox()
