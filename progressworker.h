@@ -13,13 +13,14 @@ public:
     IProgressWorker(QProgressBar* progBar, QObject* parent);
 
 signals:
-    finished();
-    setProgressRange(int hi, int low);
-    setProgressValue(int value);
+    void finished();
+    void error(const QString& errorMsg);
+    void setProgressRange(int hi, int low);
+    void setProgressValue(int value);
 
 public slots:
-    virtual onStart() = 0;
-    virtual onAbort() = 0;
+    virtual void onStart() = 0;
+    virtual void onAbort() = 0;
 };
 
 #endif // PROGRESSWORKER_H
