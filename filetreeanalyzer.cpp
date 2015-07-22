@@ -51,15 +51,15 @@ size_t FileTreeAnalyzer::GetTotalGroupFilesCount(const QString& groupName) const
 {
     // TODO: проверить
 //    return statTree_[groupName].count;
-    return statTree_.find(groupName).count;
+//    return statTree_.find(groupName).count;
 
-    auto it =
+//    auto it =
 }
 
 size_t FileTreeAnalyzer::GetTotalGroupFilesSize(const QString& groupName) const
 {
     // TODO: проверить
-    return statTree_.find(groupName).size;
+//    return statTree_.find(groupName).size;
 
 }
 

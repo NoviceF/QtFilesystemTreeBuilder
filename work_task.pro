@@ -16,10 +16,14 @@ CONFIG += c++11
 SOURCES += main.cpp\
         mainwindow.cpp \
     statgetter.cpp \
-    filetreeanalyzer.cpp
+    filetreeanalyzer.cpp \
+    progressworker.cpp \
+    controller.cpp
 
 HEADERS  += mainwindow.h \
     statgetter.h \
-    filetreeanalyzer.h
+    filetreeanalyzer.h \
+    progressworker.h \
+    controller.h
 
 FORMS    += mainwindow.ui
