@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QDesktopWidget>
 #include <QProgressBar>
+#include <QTimer>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -11,7 +12,8 @@
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
-    fsModel_(new QFileSystemModel(this)),
+    fsComboModel_(new QFileSystemModel(this)),
+    fsTreeModel_(new QFileSystemModel(this)),
     statGetter_(new StatGetter(ui_->tableView, this))
 {
     ui_->setupUi(this);
@@ -27,28 +29,21 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
             SLOT(processStatRequest(QModelIndex)));
 
-//    QString selectedPath("d:\\tmp");
 //     const QString selectedPath("");
-//     const QString selectedPath("/usr");
     const QString selectedPath("/home/novice/proj/cpp/dirtest");
 
-//    fsModel_->setFilter(QDir::Drives);
-    fsModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-    fsModel_->setRootPath(selectedPath);
+//    fsComboModel_->setFilter(QDir::Drives);
+    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    fsComboModel_->setRootPath(selectedPath);
 
-    // TODO: Проверить на винде
-//    while (fsModel_->rowCount() == 0)
-//    {
-//        qDebug() << "cowCount = " << fsModel_->rowCount();
-//        sleep(2);
-//    }
+    ui_->comboBox->blockSignals(true);
+    // принимаем сигналы только после загрузки ui
+    QTimer::singleShot(0, this, SLOT(unblockCombo()));
 
-    ui_->comboBox->setModel(fsModel_);
-    ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    ui_->comboBox->setRootModelIndex(fsModel_->index(fsModel_->rootPath()));
-    ui_->comboBox->setCurrentIndex(0);
+    fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+//    fsTreeModel_->setRootPath(selectedPath);
 
-    ui_->treeView->setModel(fsModel_);
+//    ui_->treeView->setModel(fsTreeModel_);
 
     QProgressBar* progBar = new QProgressBar;
 
@@ -71,23 +66,24 @@ void MainWindow::setTreeRootIndex(int index)
 {
     assert(ui_->comboBox->currentIndex() == index);
 
+    if (ui_->treeView->model() == nullptr)
+    {
+        initTreeRoot();
+//        return;
+    }
+
     const QString itemName = ui_->comboBox->currentText();
-    const QString selectedPath(fsModel_->rootPath() + "/" + itemName);
+    const QString selectedPath(fsComboModel_->rootPath() + "/" + itemName);
     //TODO: проверить под виндой
     QDir::toNativeSeparators(selectedPath);
     QDir selectedDir(selectedPath);
 
-    // когда в комбобоксе не выбрана никакая директорая currentIndex возвращает
-    // слэш, который игнорируется при создании QDir
-    if (selectedDir.path() != selectedPath)
-        return;
+    QModelIndex fsIndex = fsTreeModel_->index(selectedDir.absolutePath());
 
-    QModelIndex fsIndex = fsModel_->index(selectedDir.absolutePath());
-
-    if (fsModel_->canFetchMore(fsIndex))
+    if (fsTreeModel_->canFetchMore(fsIndex))
     {
         // make sure the entries in the dir are loaded
-        fsModel_->fetchMore(fsIndex);
+        fsTreeModel_->fetchMore(fsIndex);
     }
 
     ui_->treeView->setRootIndex(fsIndex);
@@ -97,7 +93,7 @@ void MainWindow::setTreeRootIndex(int index)
 void MainWindow::processStatRequest(const QModelIndex& index)
 {
 //    qDebug() << "processStatRequest";
-    const QString selectedPath = fsModel_->fileInfo(index).absoluteFilePath();
+    const QString selectedPath = fsTreeModel_->fileInfo(index).absoluteFilePath();
     statGetter_->GetStatsForPath(selectedPath);
 }
 
@@ -123,6 +119,21 @@ void MainWindow::processProgressBar(int status, const QString& msg)
             progBar->show();
         }
     }
+}
+
+void MainWindow::initTreeRoot()
+{
+    ui_->treeView->setModel(fsTreeModel_);
+    fsTreeModel_->setRootPath(fsComboModel_->rootPath());
+}
+
+void MainWindow::unblockCombo()
+{
+    ui_->comboBox->setModel(fsComboModel_);
+    ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
+
+    ui_->comboBox->blockSignals(false);
 }
 
 void MainWindow::SetPositionCenter()
