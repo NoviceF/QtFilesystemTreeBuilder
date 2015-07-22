@@ -16,49 +16,57 @@ FileTreeAnalyzer::FileTreeAnalyzer(const QString &root) :
 
 size_t FileTreeAnalyzer::GetTotalFilesCount() const
 {
-    size_t result = 0;
+    // TODO: проверить
+    size_t totalCount = 0;
 
-//    for (const auto& pair : sortTree_)
-//    {
-//        result += pair.second.count();
-//    }
+    for (const auto& pair : statTree_)
+    {
+        totalCount += pair.second.count;
+    }
 
-    return result;
+    return totalCount;
 }
 
 size_t FileTreeAnalyzer::GetTotalFilesSize() const
 {
-    size_t result = 0;
+    // TODO: проверить
+    size_t totalSize = 0;
 
-//    for (const auto& pair : sortTree_)
-//    {
-//        for (const QFileInfo& fileInfo : pair.second)
-//        {
-//            result += fileInfo.size();
-//        }
-//    }
+    for (const auto& pair : statTree_)
+    {
+        totalSize += pair.second.size;
+    }
 
-    return result;
+    return totalSize;
 }
 
-size_t FileTreeAnalyzer::GetAvgFilesSize() const
+size_t FileTreeAnalyzer::GetAvgSizeAllFiles() const
 {
+    // TODO: проверить
+    return GetTotalFilesSize() / GetTotalFilesCount();
 
 }
 
 size_t FileTreeAnalyzer::GetTotalGroupFilesCount(const QString& groupName) const
 {
+    // TODO: проверить
+//    return statTree_[groupName].count;
+    return statTree_.find(groupName).count;
 
+    auto it =
 }
 
 size_t FileTreeAnalyzer::GetTotalGroupFilesSize(const QString& groupName) const
 {
+    // TODO: проверить
+    return statTree_.find(groupName).size;
 
 }
 
 size_t FileTreeAnalyzer::GetAvgGroupFilesSize(const QString& groupName) const
 {
-
+    // TODO: проверить
+    return GetTotalGroupFilesSize(groupName) / GetTotalGroupFilesCount(groupName);
 }
 
 size_t FileTreeAnalyzer::GetSubdirsCount()

@@ -24,7 +24,7 @@ public:
 
     size_t GetTotalFilesCount() const;
     size_t GetTotalFilesSize() const;
-    size_t GetAvgFilesSize() const;
+    size_t GetAvgSizeAllFiles() const;
 
     size_t GetTotalGroupFilesCount(const QString& groupName) const;
     size_t GetTotalGroupFilesSize(const QString& groupName) const;

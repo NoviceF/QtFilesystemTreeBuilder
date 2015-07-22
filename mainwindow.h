@@ -26,7 +26,7 @@ private slots:
 //    void setComboRootIndex(int);
     void processStatRequest(const QModelIndex& index);
     void processProgressBar(int status, const QString& msg);
-    void initTreeRoot();
+    void initTreeRoot(const QString& path);
     void unblockCombo();
 
 private:

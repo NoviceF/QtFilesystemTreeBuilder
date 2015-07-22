@@ -66,14 +66,27 @@ void MainWindow::setTreeRootIndex(int index)
 {
     assert(ui_->comboBox->currentIndex() == index);
 
-    if (ui_->treeView->model() == nullptr)
-    {
-        initTreeRoot();
-//        return;
-    }
+    // если процесс построения дерева не начат - начать процесс построения дерева
+    // если процесс идёт - выбросить диалог с предложением отменить
+    // привязать диалог 
+
+    // должны быть два класса - один управляет, второй делает работу, у управляющего можно 
+    // получить состояние
+    // класс, который строит дерево должен иметь слоты start, abort, сигналы finished
+    // должен уметь отчитываться о прогрессе 
+    // контролирующий класс должен сам заполнять treeview
+
+
 
     const QString itemName = ui_->comboBox->currentText();
     const QString selectedPath(fsComboModel_->rootPath() + "/" + itemName);
+
+    if (ui_->treeView->model() == nullptr)
+    {
+        initTreeRoot(selectedPath);
+//        return;
+    }
+
     //TODO: проверить под виндой
     QDir::toNativeSeparators(selectedPath);
     QDir selectedDir(selectedPath);
@@ -121,10 +134,10 @@ void MainWindow::processProgressBar(int status, const QString& msg)
     }
 }
 
-void MainWindow::initTreeRoot()
+void MainWindow::initTreeRoot(const QString& path)
 {
     ui_->treeView->setModel(fsTreeModel_);
-    fsTreeModel_->setRootPath(fsComboModel_->rootPath());
+    fsTreeModel_->setRootPath(path);
 }
 
 void MainWindow::unblockCombo()
