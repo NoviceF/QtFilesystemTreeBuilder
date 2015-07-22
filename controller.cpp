@@ -7,8 +7,7 @@
 
 Controller::Controller(IProgressWorker* worker, QObject *parent):
     QObject(parent),
-    workerClass_(worker),
-    running_(false)
+    workerClass_(worker)
 {
     assert(workerClass_);
 }
@@ -16,22 +15,26 @@ Controller::Controller(IProgressWorker* worker, QObject *parent):
 void Controller::InitThread()
 {
 //    qDebug() << "init thread";
-    running_ = false;
-
     workerClass_->moveToThread(&workerThread_);
 
+    connect(workerClass_, SIGNAL(error(QString)), this,
+            SLOT(onError(QString)));
+
     connect(&workerThread_, SIGNAL(started()), workerClass_, SLOT(onStart()));
-//    connect(&workerThread_, &QThread::finished, worker, &QObject::deleteLater);
 
-//    connect(this, &StatGetter::operate, worker, &StatGetterThread::doWork);
-
-//    connect(worker, &StatGetterThread::resultReady, this,
-//            &StatGetter::handleResults);
-//    connect(worker, &StatGetterThread::percetnOfWorkDone, this,
-//            &StatGetter::workDonePercentageHandler);
+    connect(workerClass_, SIGNAL(finished()), &workerThread_, SLOT(quit()));
+    connect(workerClass_, SIGNAL(finished()), workerClass_, SLOT(deleteLater()));
+    connect(workerClass_, SIGNAL(finished()), this, SLOT());
 
     workerThread_.start();
     //    qDebug() << "thread start";
+}
+
+void Controller::RemoveThread()
+{
+    //    qDebug() << "remove thread";
+    workerThread_.quit();
+//        workerThread_.wait();
 }
 
 void Controller::RiseMsgBox(MsgType msgType, const QString& msg)
@@ -39,7 +42,7 @@ void Controller::RiseMsgBox(MsgType msgType, const QString& msg)
     switch (msgType)
     {
         case MsgType::WorkInProcess:
-            RiseWarningMsg(msg);
+            RiseWarningMsg();
             break;
         case MsgType::Error:
             RiseErrorMsg(msg);
@@ -49,7 +52,7 @@ void Controller::RiseMsgBox(MsgType msgType, const QString& msg)
     }
 }
 
-void Controller::RiseWarningMsg(const QString& msg)
+void Controller::RiseWarningMsg()
 {
 //        qDebug() << "thread already running";
     QMessageBox msgBox;
@@ -77,12 +80,36 @@ void Controller::RiseWarningMsg(const QString& msg)
 
 void Controller::RiseErrorMsg(const QString& msg)
 {
+//        qDebug() << "thread already running";
+    QMessageBox msgBox;
+    connect(this, SIGNAL(closeMsgBox()), &msgBox, SLOT(close()));
+    msgBox.setIcon(QMessageBox::Critical);
+    msgBox.setText("Error occured..");
+    msgBox.setInformativeText(msg);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
+    int ret = msgBox.exec();
+
+    switch (ret)
+    {
+        case QMessageBox::Ok:
+            // Save was clicked
+            break;
+        default:
+            // should never be reached
+            break;
+    }
+}
+
+void Controller::onError(const QString &errorMsg)
+{
+    RemoveThread();
+    RiseMsgBox(MsgType::Error, errorMsg);
 
 }
 
-void Controller::errorHandler(const QString &errorMsg)
+void Controller::onWorkDone()
 {
+    // do work
     RemoveThread();
-    RiseMsgBox(MsgType::Error, "error in thread!");
-
 }

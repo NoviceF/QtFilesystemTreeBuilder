@@ -20,20 +20,23 @@ class Controller : public QObject
 public:
     explicit Controller(IProgressWorker* worker, QObject* parent = 0);
 
+protected:
+    ~Controller() = default;
+
 private:
     void InitThread();
     void RemoveThread();
     void RiseMsgBox(MsgType msgType, const QString& msg = QString());
-    void RiseWarningMsg(const QString& msg);
+    void RiseWarningMsg();
     void RiseErrorMsg(const QString& msg);
 
 signals:
-    void operate(const QString& );
     void abort();
     void closeMsgBox();
 
 public slots:
-    virtual void errorHandler(const QString& errorMsg);
+    virtual void onError(const QString& errorMsg);
+    virtual void onWorkDone();
 
 private:
     IProgressWorker* workerClass_;
