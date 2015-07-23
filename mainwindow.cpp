@@ -49,16 +49,18 @@ MainWindow::MainWindow(QWidget *parent) :
 
     QProgressBar* progBar = new QProgressBar;
 
-    progBar->setMinimum(0);
-    progBar->setMaximum(100);
-    progBar->setValue(0);
     progBar->setAlignment(Qt::AlignRight);
 
-    statusBar()->addWidget(new QLabel, 1);
+    QLabel* label = new QLabel;
+    label->setAlignment(Qt::AlignCenter);
+
+    statusBar()->addWidget(label, 1);
     statusBar()->addWidget(progBar, 1);
+
     progBar->hide();
 
     treeBuilder_->SetProgBar(progBar);
+    treeBuilder_->SetLabel(label);
 }
 
 MainWindow::~MainWindow()
@@ -76,7 +78,7 @@ void MainWindow::setTreeRootIndex(int index)
     if (ui_->treeView->model() == nullptr)
     {
         initTreeRoot(selectedPath);
-//        return;
+        return;
     }
 
     //TODO: проверить под виндой

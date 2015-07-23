@@ -2,6 +2,7 @@
 #define DIRTREEBUILDER_H
 
 #include <QObject>
+#include <QLabel>
 
 #include <controller.h>
 #include <progressworker.h>
@@ -12,7 +13,7 @@ class TreeBuilderThreed : public IProgressWorker
     Q_OBJECT
 public:
     explicit TreeBuilderThreed(const QString& rootPath, QProgressBar* progBar,
-        QObject* parent = 0);
+        QLabel* label, QObject* parent = 0);
 
 public slots:
     virtual void onStart();
@@ -30,6 +31,7 @@ class DirTreeBuilder : public Controller
 public:
     explicit DirTreeBuilder(QObject* parent = 0);
     void SetProgBar(QProgressBar* progBar);
+    void SetLabel(QLabel* label);
     void BuildDirTree(const QString& path);
 
 public slots:
@@ -38,6 +40,7 @@ public slots:
 
 private:
     QProgressBar* progBar_;
+    QLabel* label_;
 };
 
 #endif // DIRTREEBUILDER_H

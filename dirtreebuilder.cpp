@@ -1,14 +1,17 @@
 ﻿#include <cassert>
 #include <stdexcept>
 
+#include <QDir>
+#include <QDirIterator>
+
 #include <unistd.h>
 
 #include "dirtreebuilder.h"
 
 
 TreeBuilderThreed::TreeBuilderThreed(const QString& rootPath,
-        QProgressBar* progBar, QObject* parent) :
-    IProgressWorker(progBar, parent),
+        QProgressBar* progBar, QLabel* label, QObject* parent) :
+    IProgressWorker(progBar, label, parent),
     root_(rootPath),
     abort_(false)
 {
@@ -18,21 +21,39 @@ TreeBuilderThreed::TreeBuilderThreed(const QString& rootPath,
 
 void TreeBuilderThreed::onStart()
 {
+    setLabel("Building directory tree..");
 
-    const int totalValue = 50;
+//    QDirModel* model = new QDirModel(QStringList() << "*",
+//         QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
+    QDir dir("/home/novice/proj/cpp/dirtest");
+    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+
+    //TODO: нужен qdiriterator и последовательный обход
+    const int totalValue = dir.entryList().count();
     setProgressRange(0, totalValue);
 
-    for (int i = 0; i < totalValue && !abort_; i += totalValue / 5)
-    {
-        emit setProgressValue(i);
-        sleep(2);
-    }
+    emit showLabel();
+    emit showProgressBar();
+
+//    for (int i = 0; i < totalValue && !abort_; i += totalValue / 5)
+//    {
+//        emit setProgressValue(i);
+//        sleep(1);
+//    }
+
+
+
+    emit setProgressValue(totalValue);
+
+    emit hideLabel();
+    emit hideProgressBar();
 
     emit finished();
 }
 
 void TreeBuilderThreed::onAbort()
 {
+    //TODO: проверять
     if (!abort_)
         abort_ = true;
 }
@@ -52,14 +73,19 @@ void DirTreeBuilder::SetProgBar(QProgressBar* progBar)
     progBar_ = progBar;
 }
 
+void DirTreeBuilder::SetLabel(QLabel* label)
+{
+    label_ = label;
+}
+
 void DirTreeBuilder::BuildDirTree(const QString& path)
 {
-    assert(progBar_);
+    assert(progBar_ && label_);
 
-    if (!progBar_)
+    if (!progBar_ || !label_)
     {
-        throw std::runtime_error("DirTreeBuilder::BuildDirTree: Progress bar "
-            "must be set before use.");
+        throw std::runtime_error("DirTreeBuilder::BuildDirTree: Progress bar and "
+             "label must be set before use.");
     }
 
     if (IsRunning())
@@ -70,7 +96,7 @@ void DirTreeBuilder::BuildDirTree(const QString& path)
             return;
     }
 
-    TreeBuilderThreed* builderThread = new TreeBuilderThreed(path, progBar_, this);
+    TreeBuilderThreed* builderThread = new TreeBuilderThreed(path, progBar_, label_);
     connect(this, SIGNAL(abort()), builderThread, SLOT(onAbort()));
     connect(builderThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(builderThread, SIGNAL(finished()), this, SLOT(onWorkDone()));
