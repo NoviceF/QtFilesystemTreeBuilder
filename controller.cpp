@@ -6,7 +6,8 @@
 
 
 Controller::Controller(QObject* parent):
-    QObject(parent)
+    QObject(parent),
+    running_(false)
 {
 }
 

@@ -57,7 +57,10 @@ void DirTreeBuilder::BuildDirTree(const QString& path)
     assert(progBar_);
 
     if (!progBar_)
-        throw std::runtime_error("Progress bar must be set before use.");
+    {
+        throw std::runtime_error("DirTreeBuilder::BuildDirTree: Progress bar "
+            "must be set before use.");
+    }
 
     if (IsRunning())
     {

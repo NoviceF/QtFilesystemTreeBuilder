@@ -131,7 +131,7 @@ void MainWindow::initTreeRoot(const QString& path)
 //    ui_->treeView->setModel(fsTreeModel_);
 //    fsTreeModel_->setRootPath(path);
 
-
+    treeBuilder_->BuildDirTree(path);
 }
 
 void MainWindow::unblockCombo()
