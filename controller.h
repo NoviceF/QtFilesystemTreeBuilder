@@ -1,4 +1,4 @@
-#ifndef CONTROLLER_H
+﻿#ifndef CONTROLLER_H
 #define CONTROLLER_H
 
 #include <QObject>
@@ -11,23 +11,17 @@ class Controller : public QObject
 {
     Q_OBJECT
 
-    enum class MsgType
-    {
-        WorkInProcess = 0,
-        Error
-    };
-
 public:
-    explicit Controller(IProgressWorker* worker, QObject* parent = 0);
+    bool IsRunning() { return running_; }
+    void RunThread(IProgressWorker* worker);
+    bool RiseRunningThreadWarningMsg();
 
 protected:
+    explicit Controller(QObject* parent = 0);
     ~Controller() = default;
 
 private:
-    void InitThread();
     void RemoveThread();
-    void RiseMsgBox(MsgType msgType, const QString& msg = QString());
-    void RiseWarningMsg();
     void RiseErrorMsg(const QString& msg);
 
 signals:
@@ -39,7 +33,6 @@ public slots:
     virtual void onWorkDone();
 
 private:
-    IProgressWorker* workerClass_;
     QThread workerThread_;
     bool running_;
 };

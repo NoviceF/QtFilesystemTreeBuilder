@@ -8,6 +8,7 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
+#include "controller.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
@@ -65,18 +66,6 @@ MainWindow::~MainWindow()
 void MainWindow::setTreeRootIndex(int index)
 {
     assert(ui_->comboBox->currentIndex() == index);
-
-    // если процесс построения дерева не начат - начать процесс построения дерева
-    // если процесс идёт - выбросить диалог с предложением отменить
-    // привязать диалог 
-
-    // должны быть два класса - один управляет, второй делает работу, у управляющего можно 
-    // получить состояние
-    // класс, который строит дерево должен иметь слоты start, abort, сигналы finished
-    // должен уметь отчитываться о прогрессе 
-    // контролирующий класс должен сам заполнять treeview
-
-
 
     const QString itemName = ui_->comboBox->currentText();
     const QString selectedPath(fsComboModel_->rootPath() + "/" + itemName);

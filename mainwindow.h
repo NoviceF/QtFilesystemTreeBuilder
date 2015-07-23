@@ -23,7 +23,6 @@ public:
 
 private slots:
     void setTreeRootIndex(int);
-//    void setComboRootIndex(int);
     void processStatRequest(const QModelIndex& index);
     void processProgressBar(int status, const QString& msg);
     void initTreeRoot(const QString& path);

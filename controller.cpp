@@ -1,32 +1,32 @@
-#include <cassert>
+﻿#include <cassert>
 
 #include <QMessageBox>
 
 #include "controller.h"
 
 
-Controller::Controller(IProgressWorker* worker, QObject *parent):
-    QObject(parent),
-    workerClass_(worker)
+Controller::Controller(QObject* parent):
+    QObject(parent)
 {
-    assert(workerClass_);
 }
 
-void Controller::InitThread()
+void Controller::RunThread(IProgressWorker* worker)
 {
 //    qDebug() << "init thread";
-    workerClass_->moveToThread(&workerThread_);
+    if (running_)
+        RemoveThread();
 
-    connect(workerClass_, SIGNAL(error(QString)), this,
-            SLOT(onError(QString)));
+    worker->moveToThread(&workerThread_);
 
-    connect(&workerThread_, SIGNAL(started()), workerClass_, SLOT(onStart()));
+    connect(worker, SIGNAL(error(QString)), this, SLOT(onError(QString)));
 
-    connect(workerClass_, SIGNAL(finished()), &workerThread_, SLOT(quit()));
-    connect(workerClass_, SIGNAL(finished()), workerClass_, SLOT(deleteLater()));
-    connect(workerClass_, SIGNAL(finished()), this, SLOT());
+    connect(&workerThread_, SIGNAL(started()), worker, SLOT(onStart()));
+
+    connect(worker, SIGNAL(finished()), &workerThread_, SLOT(quit()));
+    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
 
     workerThread_.start();
+    running_ = true;
     //    qDebug() << "thread start";
 }
 
@@ -34,25 +34,11 @@ void Controller::RemoveThread()
 {
     //    qDebug() << "remove thread";
     workerThread_.quit();
+    running_ = false;
 //        workerThread_.wait();
 }
 
-void Controller::RiseMsgBox(MsgType msgType, const QString& msg)
-{
-    switch (msgType)
-    {
-        case MsgType::WorkInProcess:
-            RiseWarningMsg();
-            break;
-        case MsgType::Error:
-            RiseErrorMsg(msg);
-        default:
-            // should never be reached
-            break;
-    }
-}
-
-void Controller::RiseWarningMsg()
+bool Controller::RiseRunningThreadWarningMsg()
 {
 //        qDebug() << "thread already running";
     QMessageBox msgBox;
@@ -61,18 +47,23 @@ void Controller::RiseWarningMsg()
     msgBox.setText("Previous operation in progress now..");
     msgBox.setInformativeText("Do you want to interrupt operation?");
     msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Cancel);
+    msgBox.setDefaultButton(QMessageBox::No);
+
     int ret = msgBox.exec();
 
     switch (ret)
     {
         case QMessageBox::Yes:
-            // Save was clicked
+            // interrupt
+            return true;
             break;
         case QMessageBox::No:
-            // Don't Save was clicked
+            // Don't interrutp
+            return false;
             break;
         default:
+            assert(false);
+            return false;
             // should never be reached
             break;
     }
@@ -104,7 +95,7 @@ void Controller::RiseErrorMsg(const QString& msg)
 void Controller::onError(const QString &errorMsg)
 {
     RemoveThread();
-    RiseMsgBox(MsgType::Error, errorMsg);
+    RiseErrorMsg(errorMsg);
 
 }
 
