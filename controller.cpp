@@ -58,7 +58,7 @@ bool Controller::RiseRunningThreadWarningMsg()
             return true;
             break;
         case QMessageBox::No:
-            // Don't interrutp
+            // Don't interrupt
             return false;
             break;
         default:
@@ -87,6 +87,7 @@ void Controller::RiseErrorMsg(const QString& msg)
             // Save was clicked
             break;
         default:
+            assert(false);
             // should never be reached
             break;
     }
@@ -96,11 +97,10 @@ void Controller::onError(const QString &errorMsg)
 {
     RemoveThread();
     RiseErrorMsg(errorMsg);
-
 }
 
 void Controller::onWorkDone()
 {
-    // do work
     RemoveThread();
+    emit closeMsgBox();
 }

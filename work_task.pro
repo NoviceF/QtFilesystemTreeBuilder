@@ -18,12 +18,14 @@ SOURCES += main.cpp\
     statgetter.cpp \
     filetreeanalyzer.cpp \
     progressworker.cpp \
-    controller.cpp
+    controller.cpp \
+    dirtreebuilder.cpp
 
 HEADERS  += mainwindow.h \
     statgetter.h \
     filetreeanalyzer.h \
     progressworker.h \
-    controller.h
+    controller.h \
+    dirtreebuilder.h
 
 FORMS    += mainwindow.ui

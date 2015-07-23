@@ -11,6 +11,7 @@ class IProgressWorker : public QObject
 
 public:
     IProgressWorker(QProgressBar* progBar, QObject* parent);
+    virtual ~IProgressWorker(){}
 
 signals:
     void finished();
