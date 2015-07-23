@@ -1,3 +1,4 @@
+﻿#include <cassert>
 #include <stdexcept>
 
 #include <unistd.h>
@@ -39,8 +40,25 @@ void TreeBuilderThreed::onAbort()
 ///
 /// \brief DirTreeBuilder
 ///
-void DirTreeBuilder::BuildDirTree(TreeBuilderThreed* builderThread)
+DirTreeBuilder::DirTreeBuilder(QObject* parent) :
+    Controller(parent),
+    progBar_(nullptr)
 {
+
+}
+
+void DirTreeBuilder::SetProgBar(QProgressBar* progBar)
+{
+    progBar_ = progBar;
+}
+
+void DirTreeBuilder::BuildDirTree(const QString& path)
+{
+    assert(progBar_);
+
+    if (!progBar_)
+        throw std::runtime_error("Progress bar must be set before use.");
+
     if (IsRunning())
     {
         if (RiseRunningThreadWarningMsg())
@@ -49,6 +67,7 @@ void DirTreeBuilder::BuildDirTree(TreeBuilderThreed* builderThread)
             return;
     }
 
+    TreeBuilderThreed* builderThread = new TreeBuilderThreed(path, progBar_, this);
     connect(this, SIGNAL(abort()), builderThread, SLOT(onAbort()));
     connect(builderThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(builderThread, SIGNAL(finished()), this, SLOT(onWorkDone()));

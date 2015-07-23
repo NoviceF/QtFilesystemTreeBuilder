@@ -1,4 +1,4 @@
-#ifndef DIRTREEBUILDER_H
+﻿#ifndef DIRTREEBUILDER_H
 #define DIRTREEBUILDER_H
 
 #include <QObject>
@@ -29,11 +29,15 @@ class DirTreeBuilder : public Controller
     Q_OBJECT
 public:
     explicit DirTreeBuilder(QObject* parent = 0);
-    void BuildDirTree(TreeBuilderThreed* builderThread);
+    void SetProgBar(QProgressBar* progBar);
+    void BuildDirTree(const QString& path);
 
 public slots:
     virtual void onError(const QString& errorMsg);
     virtual void onWorkDone();
+
+private:
+    QProgressBar* progBar_;
 };
 
 #endif // DIRTREEBUILDER_H

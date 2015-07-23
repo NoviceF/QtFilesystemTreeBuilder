@@ -8,14 +8,15 @@
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include "controller.h"
 
 MainWindow::MainWindow(QWidget *parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
     fsComboModel_(new QFileSystemModel(this)),
     fsTreeModel_(new QFileSystemModel(this)),
-    statGetter_(new StatGetter(ui_->tableView, this))
+    statGetter_(new StatGetter(ui_->tableView, this)),
+    treeBuilder_(new DirTreeBuilder(this))
+
 {
     ui_->setupUi(this);
 
@@ -56,6 +57,8 @@ MainWindow::MainWindow(QWidget *parent) :
     statusBar()->addWidget(new QLabel, 1);
     statusBar()->addWidget(progBar, 1);
     progBar->hide();
+
+    treeBuilder_->SetProgBar(progBar);
 }
 
 MainWindow::~MainWindow()
@@ -125,8 +128,10 @@ void MainWindow::processProgressBar(int status, const QString& msg)
 
 void MainWindow::initTreeRoot(const QString& path)
 {
-    ui_->treeView->setModel(fsTreeModel_);
-    fsTreeModel_->setRootPath(path);
+//    ui_->treeView->setModel(fsTreeModel_);
+//    fsTreeModel_->setRootPath(path);
+
+
 }
 
 void MainWindow::unblockCombo()

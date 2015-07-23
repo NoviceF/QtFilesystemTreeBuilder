@@ -7,7 +7,8 @@
 #include <QListView>
 #include <QString>
 
-#include <statgetter.h>
+#include "dirtreebuilder.h"
+#include "statgetter.h"
 
 namespace Ui {
 class MainWindow;
@@ -36,6 +37,7 @@ private:
     QFileSystemModel* fsComboModel_;
     QFileSystemModel* fsTreeModel_;
     StatGetter* statGetter_;
+    DirTreeBuilder* treeBuilder_;
 };
 
 #endif // MAINWINDOW_H
