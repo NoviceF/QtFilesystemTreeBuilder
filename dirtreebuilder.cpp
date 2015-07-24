@@ -80,26 +80,8 @@ DirTreeBuilder::DirTreeBuilder(QObject* parent) :
 
 }
 
-void DirTreeBuilder::SetProgBar(QProgressBar* progBar)
-{
-    progBar_ = progBar;
-}
-
-void DirTreeBuilder::SetLabel(QLabel* label)
-{
-    label_ = label;
-}
-
 void DirTreeBuilder::BuildDirTree(const QString& path)
 {
-    assert(progBar_ && label_);
-
-    if (!progBar_ || !label_)
-    {
-        throw std::runtime_error("DirTreeBuilder::BuildDirTree: Progress bar and "
-             "label must be set before use.");
-    }
-
     if (IsRunning())
     {
         if (RiseRunningThreadWarningMsg())
@@ -109,9 +91,6 @@ void DirTreeBuilder::BuildDirTree(const QString& path)
     }
 
     TreeBuilderThread* builderThread = new TreeBuilderThread(path, progBar_, label_);
-    connect(this, SIGNAL(abort()), builderThread, SLOT(onAbort()));
-    connect(builderThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
-    connect(builderThread, SIGNAL(finished()), this, SLOT(onWorkDone()));
 
     RunThread(builderThread);
 }

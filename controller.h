@@ -15,6 +15,10 @@ public:
     bool IsRunning() { return running_; }
     void RunThread(IProgressWorker* worker);
     bool RiseRunningThreadWarningMsg();
+    void SetProgBar(QProgressBar* progBar);
+    QProgressBar* GetProgBar();
+    void SetLabel(QLabel* label);
+    QLabel* GetLabel();
 
 protected:
     explicit Controller(QObject* parent = 0);
@@ -33,6 +37,8 @@ public slots:
     virtual void onWorkDone();
 
 private:
+    QProgressBar* progBar_;
+    QLabel* label_;
     QThread workerThread_;
     bool running_;
 };

@@ -1,56 +1,40 @@
 ﻿#ifndef STATGETTER_H
 #define STATGETTER_H
 
-#include <QObject>
 #include <QTableView>
-#include <QThread>
 
-class StatGetterThread : public QObject
+#include <controller.h>
+
+class StatGetterThread : public IProgressWorker
 {
     Q_OBJECT
 public:
-    StatGetterThread();
-
-private:
-    int percentOfWorkDone_;
-
+    StatGetterThread(const QString& path, QProgressBar* progBar,
+        QLabel* label, QObject* parent = 0);
 
 public slots:
-    void doWork(const QString& parameter);
+    virtual void onStart();
+    virtual void onAbort();
 
-    signals:
-    void resultReady(const QString &result);
-    void percetnOfWorkDone(int percent);
+private:
+    QString path_;
+    bool abort_;
 };
 
-class StatGetter : public QObject
+class StatGetter : public Controller
 {
     Q_OBJECT
 
 public:
     explicit StatGetter(QTableView *&tableView, QObject* parent = 0);
-    ~StatGetter();
     void GetStatsForPath(const QString& rootPath);
 
-private:
-    void InitThread();
-    void RemoveThread();
-    void RiseMsgBox();
-
-signals:
-    void operate(const QString& );
-    void workDoneStatus(int, const QString&);
-    void closeMsgBox();
-
 public slots:
-    void handleResults(const QString& result);
-    void workDonePercentageHandler(int percent);
+    virtual void onError(const QString& errorMsg);
+    virtual void onWorkDone();
 
 private:
     QTableView* tableView_;
-    QThread workerThread_;
-    bool running_;
-    int percentOfWorkDone_;
     QString pathInWork_;
 };
 

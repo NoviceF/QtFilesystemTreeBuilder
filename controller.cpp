@@ -26,6 +26,10 @@ void Controller::RunThread(IProgressWorker* worker)
     connect(worker, SIGNAL(finished()), &workerThread_, SLOT(quit()));
     connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
 
+    connect(this, SIGNAL(abort()), worker, SLOT(onAbort()));
+    connect(worker, SIGNAL(error(QString)), this, SLOT(onError(QString)));
+    connect(worker, SIGNAL(finished()), this, SLOT(onWorkDone()));
+
     workerThread_.start();
     running_ = true;
     //    qDebug() << "thread start";
@@ -68,6 +72,40 @@ bool Controller::RiseRunningThreadWarningMsg()
             // should never be reached
             break;
     }
+}
+
+void Controller::SetProgBar(QProgressBar* progBar)
+{
+    progBar_ = progBar;
+
+    if (!progBar_)
+    {
+        throw std::runtime_error("DirTreeBuilder::BuildDirTree: Progress bar "
+             "must be set before use.");
+    }
+}
+
+QProgressBar*Controller::GetProgBar()
+{
+    assert(progBar_);
+    return progBar_;
+}
+
+void Controller::SetLabel(QLabel* label)
+{
+    label_ = label;
+
+    if (!label_)
+    {
+        throw std::runtime_error("DirTreeBuilder::BuildDirTree: Label "
+             "must be set before use.");
+    }
+}
+
+QLabel*Controller::GetLabel()
+{
+    assert(label_);
+    return label_;
 }
 
 void Controller::RiseErrorMsg(const QString& msg)

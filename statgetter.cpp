@@ -1,4 +1,6 @@
-﻿#include <QApplication>
+﻿#include <cassert>
+
+#include <QApplication>
 #include <QDebug>
 #include <QMessageBox>
 #include <QString>
@@ -9,143 +11,68 @@
 #include "statgetter.h"
 #include <filetreeanalyzer.h>
 
-StatGetterThread::StatGetterThread() :
-    percentOfWorkDone_(0)
+
+StatGetterThread::StatGetterThread(const QString& path, QProgressBar* progBar,
+    QLabel* label, QObject* parent) :
+    IProgressWorker(progBar, label, parent),
+    path_(path),
+    abort_(false)
+{
+    if (path_.isEmpty())
+        throw std::runtime_error("Path was not setted.");
+}
+
+void StatGetterThread::onStart()
 {
 
 }
 
-void StatGetterThread::doWork(const QString& parameter)
+void StatGetterThread::onAbort()
 {
-    QString result (parameter);
-//    qDebug() << "do calculation in thread";
+    //TODO: проверять
+    if (!abort_)
+        abort_ = true;
 
-    FileTreeAnalyzer analyzer(parameter);
-    qDebug() << "subdirs count = " <<  analyzer.GetSubdirsCount();
-
-//    for (int i = 0; i < 5; ++i)
-//    {
-        percentOfWorkDone_ = percentOfWorkDone_ + 20;
-        emit percetnOfWorkDone(percentOfWorkDone_);
-//        sleep(2);
-//    }
-
-    emit resultReady(result);
-    emit percetnOfWorkDone(percentOfWorkDone_);
-    percentOfWorkDone_ = -1;
+    emit error("Abort called");
 }
 
+///
+/// \brief StatGetter
+///
 StatGetter::StatGetter(QTableView*& tableView, QObject* parent) :
-    QObject(parent),
-    tableView_(tableView),
-    running_(false)
+    Controller(parent),
+    tableView_(tableView)
 {
-
-}
-
-StatGetter::~StatGetter()
-{
-
+    assert(tableView_);
 }
 
 void StatGetter::GetStatsForPath(const QString& rootPath)
 {
-    if (!running_)
+    pathInWork_ = rootPath;
+    assert(!pathInWork_.isEmpty());
+
+    if (IsRunning())
     {
-        pathInWork_ = rootPath;
-        InitThread();
-        running_ = true;
-//        qDebug() << "send job to thread";
-        emit operate(rootPath);
-    }
-    else if (rootPath != pathInWork_)
-    {
-        RiseMsgBox();
-    }
-}
-
-void StatGetter::InitThread()
-{
-//    qDebug() << "init thread";
-    running_ = false;
-
-    StatGetterThread* worker = new StatGetterThread;
-    worker->moveToThread(&workerThread_);
-
-    connect(&workerThread_, &QThread::finished, worker, &QObject::deleteLater);
-
-    connect(this, &StatGetter::operate, worker, &StatGetterThread::doWork);
-
-    connect(worker, &StatGetterThread::resultReady, this,
-            &StatGetter::handleResults);
-    connect(worker, &StatGetterThread::percetnOfWorkDone, this,
-            &StatGetter::workDonePercentageHandler);
-
-    workerThread_.start();
-//    qDebug() << "thread start";
-}
-
-void StatGetter::RemoveThread()
-{
-//    qDebug() << "remove thread";
-    running_ = false;
-    workerThread_.quit();
-//        workerThread_.wait();
-}
-
-void StatGetter::RiseMsgBox()
-{
-//        qDebug() << "thread already running";
-    QMessageBox msgBox;
-    connect(this, SIGNAL(closeMsgBox()), &msgBox, SLOT(close()));
-    msgBox.setIcon(QMessageBox::Question);
-    msgBox.setText("Previous operation in progress now..");
-    msgBox.setInformativeText("Do you want to interrupt operation?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::Cancel);
-    int ret = msgBox.exec();
-
-    switch (ret)
-    {
-        case QMessageBox::Yes:
-            // Save was clicked
-            break;
-        case QMessageBox::No:
-            // Don't Save was clicked
-            break;
-        default:
-            // should never be reached
-            break;
-    }
-}
-
-void StatGetter::handleResults(const QString& result)
-{
-//    qDebug() << "get thread result" << result;
-    RemoveThread();
-}
-
-void StatGetter::workDonePercentageHandler(int percent)
-{
-    const QString msg("processing of statistics..");
-
-    if (percent < 0 || percent > 100)
-    {
-        RemoveThread();
-        emit(workDoneStatus(-1, msg));
-    }
-    else
-    {
-        if (percent == 100)
-        {
-            emit closeMsgBox();
-            emit workDoneStatus(-1, msg);
-        }
+        if (RiseRunningThreadWarningMsg())
+           emit abort();
         else
-        {
-            emit(workDoneStatus(percent, msg));
-        }
+            return;
     }
+
+    StatGetterThread* statGetterThread =
+            new StatGetterThread(rootPath, GetProgBar(), GetLabel());
+
+    RunThread(statGetterThread);
 }
 
+void StatGetter::onError(const QString& errorMsg)
+{
+    Controller::onError(errorMsg);
+}
+
+void StatGetter::onWorkDone()
+{
+    // do work
+    Controller::onWorkDone();
+}
 

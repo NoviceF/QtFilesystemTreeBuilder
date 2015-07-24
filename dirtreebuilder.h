@@ -37,10 +37,9 @@ private:
 class DirTreeBuilder : public Controller
 {
     Q_OBJECT
+
 public:
     explicit DirTreeBuilder(QObject* parent = 0);
-    void SetProgBar(QProgressBar* progBar);
-    void SetLabel(QLabel* label);
     void BuildDirTree(const QString& path);
 
 public slots:
