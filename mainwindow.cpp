@@ -34,11 +34,11 @@ MainWindow::MainWindow(QWidget *parent) :
      const QString selectedPath("");
 //    const QString selectedPath("/home/novice/proj/cpp/dirtest");
 
-//    fsComboModel_->setFilter(QDir::Drives);
-    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    ui_->comboBox->blockSignals(true);
+    fsComboModel_->setFilter(QDir::Drives);
+//    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     fsComboModel_->setRootPath(selectedPath);
 
-    ui_->comboBox->blockSignals(true);
     // принимаем сигналы только после загрузки ui
     QTimer::singleShot(0, this, SLOT(unblockCombo()));
 
@@ -73,7 +73,14 @@ void MainWindow::setTreeRootIndex(int index)
     assert(ui_->comboBox->currentIndex() == index);
 
     const QString itemName = ui_->comboBox->currentText();
-    const QString selectedPath(fsComboModel_->rootPath() + "/" + itemName);
+    QString selectedPath;
+
+    if (fsComboModel_->rootPath().isEmpty())
+        selectedPath = itemName + "/";
+    else
+        selectedPath = fsComboModel_->rootPath() + "/" + itemName;
+
+    selectedPath = QDir::toNativeSeparators(selectedPath);
 
     if (ui_->treeView->model() == nullptr)
     {
@@ -82,7 +89,6 @@ void MainWindow::setTreeRootIndex(int index)
     }
 
     //TODO: проверить под виндой
-    QDir::toNativeSeparators(selectedPath);
     QDir selectedDir(selectedPath);
 
     QModelIndex fsIndex = fsTreeModel_->index(selectedDir.absolutePath());

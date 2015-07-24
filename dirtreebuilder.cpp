@@ -16,34 +16,23 @@ TreeBuilderThread::TreeBuilderThread(const QString& rootPath,
         QProgressBar* progBar, QLabel* label, QObject* parent) :
     IProgressWorker(progBar, label, parent),
     root_(rootPath),
-    abort_(false),
-    dirsWasLoaded_(0),
-    dirList_(GetDirList())
+    abort_(false)
 {
     if (root_.isEmpty())
         throw std::runtime_error("Root path was not setted.");
 }
 void TreeBuilderThread::dirWasLoaded(const QString&)
-
 {
-    ++dirsWasLoaded_;
-    emit setProgressValue(dirsWasLoaded_);
+//    emit setProgressValue(dirsWasLoaded_);
     qDebug() << "dir was loaded";
 }
-
-//    for (int i = 0; i < totalValue && !abort_; i += totalValue / 5)
-//    {
-//        emit setProgressValue(i);
-//        sleep(1);
-//    }
-
 
 void TreeBuilderThread::onStart()
 {
     setLabel("Building directory tree..");
 
     //TODO: нужен qdiriterator и последовательный обход
-    const size_t totalValue = dirList_.count();
+    const size_t totalValue = 0;
     setProgressRange(0, totalValue);
 
     emit showLabel();
@@ -54,23 +43,9 @@ void TreeBuilderThread::onStart()
             SLOT(dirWasLoaded(QString)));
     connect(this, SIGNAL(error(QString)), &wait_loop, SLOT(quit()));
 
-    while ((dirsWasLoaded_ != totalValue) && !abort_)
+    while (!abort_)
     {
-        for (const QString& path : dirList_)
-        {
-            qDebug() << "test 1";
-            QModelIndex index = fsModel_.index(path);
-            if (fsModel_.canFetchMore(index))
-            {
-                fsModel_.fetchMore(index);
-            qDebug() << "test 2";
-            }
-
-            QCoreApplication::processEvents();
-            qDebug() << "test 3";
-        }
-
-        qDebug() << "test 4";
+        QCoreApplication::processEvents();
         wait_loop.exec();
     }
 
@@ -93,18 +68,6 @@ void TreeBuilderThread::onAbort()
         abort_ = true;
 
     emit error("Abort called");
-}
-
-QStringList TreeBuilderThread::GetDirList()
-{
-    QDirIterator it(root_, QStringList() << "*", QDir::Dirs | QDir::NoDotAndDotDot,
-                    QDirIterator::Subdirectories);
-    QStringList dirList;
-
-    while (it.hasNext())
-        dirList.push_back(it.next());
-
-    return dirList;
 }
 
 ///

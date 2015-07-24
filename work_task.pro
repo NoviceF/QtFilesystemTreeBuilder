@@ -19,13 +19,15 @@ SOURCES += main.cpp\
     filetreeanalyzer.cpp \
     progressworker.cpp \
     controller.cpp \
-    dirtreebuilder.cpp
+    dirtreebuilder.cpp \
+    progressfilesystemmodel.cpp
 
 HEADERS  += mainwindow.h \
     statgetter.h \
     filetreeanalyzer.h \
     progressworker.h \
     controller.h \
-    dirtreebuilder.h
+    dirtreebuilder.h \
+    progressfilesystemmodel.h
 
 FORMS    += mainwindow.ui

@@ -32,8 +32,6 @@ private:
     QFileSystemModel fsModel_;
     QString root_;
     bool abort_;
-    size_t dirsWasLoaded_;
-    const QStringList dirList_;
 };
 
 class DirTreeBuilder : public Controller
