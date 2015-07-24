@@ -31,8 +31,8 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
             SLOT(processStatRequest(QModelIndex)));
 
-//     const QString selectedPath("");
-    const QString selectedPath("/home/novice/proj/cpp/dirtest");
+     const QString selectedPath("");
+//    const QString selectedPath("/home/novice/proj/cpp/dirtest");
 
 //    fsComboModel_->setFilter(QDir::Drives);
     fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);

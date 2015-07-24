@@ -1,6 +1,8 @@
 ﻿#include <cassert>
 #include <stdexcept>
 
+#include <QCoreApplication>
+#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
 #include <QEventLoop>
@@ -15,31 +17,18 @@ TreeBuilderThread::TreeBuilderThread(const QString& rootPath,
     IProgressWorker(progBar, label, parent),
     root_(rootPath),
     abort_(false),
-    dirWasLoaded_(0)
+    dirsWasLoaded_(0),
+    dirList_(GetDirList())
 {
     if (root_.isEmpty())
         throw std::runtime_error("Root path was not setted.");
 }
-
-size_t TreeBuilderThread::GetTotalDirsCount()
-{
-    QDirIterator it(root_, QStringList() << "*", QDir::Dirs | QDir::NoDotAndDotDot,
-                    QDirIterator::Subdirectories);
-
-    size_t counter = 0;
-
-    while (it.hasNext())
-    {
-        it.next();
-        ++counter;
-    }
-
-    return counter;
-}
-
 void TreeBuilderThread::dirWasLoaded(const QString&)
+
 {
-    ++dirWasLoaded_;
+    ++dirsWasLoaded_;
+    emit setProgressValue(dirsWasLoaded_);
+    qDebug() << "dir was loaded";
 }
 
 //    for (int i = 0; i < totalValue && !abort_; i += totalValue / 5)
@@ -54,7 +43,7 @@ void TreeBuilderThread::onStart()
     setLabel("Building directory tree..");
 
     //TODO: нужен qdiriterator и последовательный обход
-    const size_t totalValue = GetTotalDirsCount();
+    const size_t totalValue = dirList_.count();
     setProgressRange(0, totalValue);
 
     emit showLabel();
@@ -65,12 +54,29 @@ void TreeBuilderThread::onStart()
             SLOT(dirWasLoaded(QString)));
     connect(this, SIGNAL(error(QString)), &wait_loop, SLOT(quit()));
 
-    fsModel_.setRootPath(root_);
-
-    while ((dirWasLoaded_ != totalValue) && !abort_)
+    while ((dirsWasLoaded_ != totalValue) && !abort_)
     {
+        for (const QString& path : dirList_)
+        {
+            qDebug() << "test 1";
+            QModelIndex index = fsModel_.index(path);
+            if (fsModel_.canFetchMore(index))
+            {
+                fsModel_.fetchMore(index);
+            qDebug() << "test 2";
+            }
+
+            QCoreApplication::processEvents();
+            qDebug() << "test 3";
+        }
+
+        qDebug() << "test 4";
         wait_loop.exec();
     }
+
+    fsModel_.setRootPath(root_);
+    QThread::msleep(2000);
+    qDebug() << "test 5";
 
     emit setProgressValue(totalValue);
 
@@ -87,6 +93,18 @@ void TreeBuilderThread::onAbort()
         abort_ = true;
 
     emit error("Abort called");
+}
+
+QStringList TreeBuilderThread::GetDirList()
+{
+    QDirIterator it(root_, QStringList() << "*", QDir::Dirs | QDir::NoDotAndDotDot,
+                    QDirIterator::Subdirectories);
+    QStringList dirList;
+
+    while (it.hasNext())
+        dirList.push_back(it.next());
+
+    return dirList;
 }
 
 ///

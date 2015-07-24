@@ -2,8 +2,10 @@
 #define DIRTREEBUILDER_H
 
 #include <QFileSystemModel>
-#include <QObject>
 #include <QLabel>
+#include <QObject>
+#include <QStringList>
+
 
 #include <controller.h>
 #include <progressworker.h>
@@ -17,7 +19,7 @@ public:
         QLabel* label, QObject* parent = 0);
 
 private:
-    size_t GetTotalDirsCount();
+    QStringList GetDirList();
 
 private slots:
     void dirWasLoaded(const QString&);
@@ -30,7 +32,8 @@ private:
     QFileSystemModel fsModel_;
     QString root_;
     bool abort_;
-    size_t dirWasLoaded_;
+    size_t dirsWasLoaded_;
+    const QStringList dirList_;
 };
 
 class DirTreeBuilder : public Controller
