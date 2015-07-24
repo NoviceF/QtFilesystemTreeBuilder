@@ -3,37 +3,44 @@
 
 #include <QDir>
 #include <QDirIterator>
+#include <QEventLoop>
 
 #include <unistd.h>
 
 #include "dirtreebuilder.h"
 
 
-TreeBuilderThreed::TreeBuilderThreed(const QString& rootPath,
+TreeBuilderThread::TreeBuilderThread(const QString& rootPath,
         QProgressBar* progBar, QLabel* label, QObject* parent) :
     IProgressWorker(progBar, label, parent),
     root_(rootPath),
-    abort_(false)
+    abort_(false),
+    dirWasLoaded_(0)
 {
     if (root_.isEmpty())
         throw std::runtime_error("Root path was not setted.");
 }
 
-void TreeBuilderThreed::onStart()
+size_t TreeBuilderThread::GetTotalDirsCount()
 {
-    setLabel("Building directory tree..");
+    QDirIterator it(root_, QStringList() << "*", QDir::Dirs | QDir::NoDotAndDotDot,
+                    QDirIterator::Subdirectories);
 
-//    QDirModel* model = new QDirModel(QStringList() << "*",
-//         QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
-    QDir dir("/home/novice/proj/cpp/dirtest");
-    dir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    size_t counter = 0;
 
-    //TODO: нужен qdiriterator и последовательный обход
-    const int totalValue = dir.entryList().count();
-    setProgressRange(0, totalValue);
+    while (it.hasNext())
+    {
+        it.next();
+        ++counter;
+    }
 
-    emit showLabel();
-    emit showProgressBar();
+    return counter;
+}
+
+void TreeBuilderThread::dirWasLoaded(const QString&)
+{
+    ++dirWasLoaded_;
+}
 
 //    for (int i = 0; i < totalValue && !abort_; i += totalValue / 5)
 //    {
@@ -42,6 +49,28 @@ void TreeBuilderThreed::onStart()
 //    }
 
 
+void TreeBuilderThread::onStart()
+{
+    setLabel("Building directory tree..");
+
+    //TODO: нужен qdiriterator и последовательный обход
+    const size_t totalValue = GetTotalDirsCount();
+    setProgressRange(0, totalValue);
+
+    emit showLabel();
+    emit showProgressBar();
+    QEventLoop wait_loop;
+    connect(&fsModel_, SIGNAL(directoryLoaded(QString)), &wait_loop, SLOT(quit()));
+    connect(&fsModel_, SIGNAL(directoryLoaded(QString)), this,
+            SLOT(dirWasLoaded(QString)));
+    connect(this, SIGNAL(error(QString)), &wait_loop, SLOT(quit()));
+
+    fsModel_.setRootPath(root_);
+
+    while ((dirWasLoaded_ != totalValue) && !abort_)
+    {
+        wait_loop.exec();
+    }
 
     emit setProgressValue(totalValue);
 
@@ -51,11 +80,13 @@ void TreeBuilderThreed::onStart()
     emit finished();
 }
 
-void TreeBuilderThreed::onAbort()
+void TreeBuilderThread::onAbort()
 {
     //TODO: проверять
     if (!abort_)
         abort_ = true;
+
+    emit error("Abort called");
 }
 
 ///
@@ -96,7 +127,7 @@ void DirTreeBuilder::BuildDirTree(const QString& path)
             return;
     }
 
-    TreeBuilderThreed* builderThread = new TreeBuilderThreed(path, progBar_, label_);
+    TreeBuilderThread* builderThread = new TreeBuilderThread(path, progBar_, label_);
     connect(this, SIGNAL(abort()), builderThread, SLOT(onAbort()));
     connect(builderThread, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(builderThread, SIGNAL(finished()), this, SLOT(onWorkDone()));
