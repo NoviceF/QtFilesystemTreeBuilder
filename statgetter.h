@@ -62,7 +62,8 @@ class StatGetter : public Controller
 public:
     explicit StatGetter(QTableView* tableView, QObject* parent = 0);
     void GetStatsForPath(const QString& rootPath);
-    // переопределить виртуальную функцию
+    virtual void SetView(QTableView* view);
+    virtual QTableView* GetView();
 
 public slots:
     virtual void onError(const QString& errorMsg);

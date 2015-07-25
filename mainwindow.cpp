@@ -25,9 +25,6 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
             SLOT(setTreeRootIndex(int)));
 
-    connect(statGetter_, SIGNAL(workDoneStatus(int,QString)), this,
-            SLOT(processProgressBar(int,QString)));
-
     connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
             SLOT(processStatRequest(QModelIndex)));
 
@@ -61,6 +58,11 @@ MainWindow::MainWindow(QWidget *parent) :
 
     treeBuilder_->SetProgBar(progBar);
     treeBuilder_->SetLabel(label);
+
+    statGetter_->SetProgBar(progBar);
+    statGetter_->SetLabel(label);
+    statGetter_->SetView(ui_->tableView);
+
 }
 
 MainWindow::~MainWindow()
@@ -108,30 +110,6 @@ void MainWindow::processStatRequest(const QModelIndex& index)
 //    qDebug() << "processStatRequest";
     const QString selectedPath = fsTreeModel_->fileInfo(index).absoluteFilePath();
     statGetter_->GetStatsForPath(selectedPath);
-}
-
-void MainWindow::processProgressBar(int status, const QString& msg)
-{
-    QLabel* label = statusBar()->findChild<QLabel*>("");
-    QProgressBar* progBar = statusBar()->findChild<QProgressBar*>("");
-    assert(progBar);
-    label->setText(msg);
-
-    if (status == -1)
-    {
-        progBar->hide();
-        label->setText("");
-        progBar->setValue(0);
-    }
-    else
-    {
-        progBar->setValue(status);
-
-        if (progBar->isHidden())
-        {
-            progBar->show();
-        }
-    }
 }
 
 void MainWindow::initTreeRoot(const QString& path)

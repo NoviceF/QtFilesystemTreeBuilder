@@ -209,6 +209,20 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     RunThread(statGetterThread);
 }
 
+void StatGetter::SetView(QTableView* view)
+{
+    if (!view)
+        throw std::runtime_error("StatGetter::SetView: view is null.");
+
+     tableView_ = view;
+}
+
+QTableView*StatGetter::GetView()
+{
+    assert(tableView_);
+    return tableView_;
+}
+
 void StatGetter::onError(const QString& errorMsg)
 {
     Controller::onError(errorMsg);

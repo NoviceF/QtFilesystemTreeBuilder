@@ -20,7 +20,7 @@ public:
     QProgressBar* GetProgBar();
     void SetLabel(QLabel* label);
     QLabel* GetLabel();
-    virtual void SetView(QAbstractItemView* view);
+    virtual void SetView(QAbstractItemView*);
     virtual QAbstractItemView* GetView();
 
 protected:

@@ -108,14 +108,14 @@ QLabel* Controller::GetLabel()
     return label_;
 }
 
-/*virtual*/ void Controller::SetView(QAbstractItemView* view)
+/*virtual*/ void Controller::SetView(QAbstractItemView*)
 {
-    std::runtime_error("Not implemented.");
+    throw std::runtime_error(" Controller::SetView: Not implemented.");
 }
 
 /*virtual*/ QAbstractItemView* Controller::GetView()
 {
-    std::runtime_error("Not implemented.");
+    throw std::runtime_error("Controller::GetView: Not implemented.");
 }
 
 
