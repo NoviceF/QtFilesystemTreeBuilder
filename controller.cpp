@@ -85,7 +85,7 @@ void Controller::SetProgBar(QProgressBar* progBar)
     }
 }
 
-QProgressBar*Controller::GetProgBar()
+QProgressBar* Controller::GetProgBar()
 {
     assert(progBar_);
     return progBar_;
@@ -102,11 +102,22 @@ void Controller::SetLabel(QLabel* label)
     }
 }
 
-QLabel*Controller::GetLabel()
+QLabel* Controller::GetLabel()
 {
     assert(label_);
     return label_;
 }
+
+/*virtual*/ void Controller::SetView(QAbstractItemView* view)
+{
+    std::runtime_error("Not implemented.");
+}
+
+/*virtual*/ QAbstractItemView* Controller::GetView()
+{
+    std::runtime_error("Not implemented.");
+}
+
 
 void Controller::RiseErrorMsg(const QString& msg)
 {

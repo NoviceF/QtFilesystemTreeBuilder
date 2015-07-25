@@ -16,13 +16,11 @@ CONFIG += c++11
 SOURCES += main.cpp\
         mainwindow.cpp \
     statgetter.cpp \
-    filetreeanalyzer.cpp \
     progressworker.cpp \
     controller.cpp \
     dirtreebuilder.cpp
 HEADERS  += mainwindow.h \
     statgetter.h \
-    filetreeanalyzer.h \
     progressworker.h \
     controller.h \
     dirtreebuilder.h

@@ -1,6 +1,7 @@
 ﻿#ifndef CONTROLLER_H
 #define CONTROLLER_H
 
+#include <QAbstractItemView>
 #include <QObject>
 #include <QTableView>
 #include <QThread>
@@ -19,6 +20,8 @@ public:
     QProgressBar* GetProgBar();
     void SetLabel(QLabel* label);
     QLabel* GetLabel();
+    virtual void SetView(QAbstractItemView* view);
+    virtual QAbstractItemView* GetView();
 
 protected:
     explicit Controller(QObject* parent = 0);
