@@ -12,79 +12,17 @@
 
 #include "statgetter.h"
 
-StatGetterThread::StatGetterThread(const QString& path, QProgressBar* progBar,
-    QLabel* label, QTableWidget* statTable, QObject* parent) :
+StatGetterThread::StatGetterThread(const QString& path, stattree_t& statTree,
+    QProgressBar* progBar, QLabel* label, QObject* parent) :
     IProgressWorker(progBar, label, parent),
     path_(path),
-    statTable_(statTable)
+    statTree_(statTree)
 {
     if (path_.isEmpty())
     {
         throw std::runtime_error("StatGetterThread::StatGetterThread: Path "
                                  "was not setted.");
     }
-}
-
-size_t StatGetterThread::GetTotalFilesCount() const
-{
-    size_t totalCount = 0;
-
-    for (const auto& pair : statTree_)
-    {
-        totalCount += pair.second.count;
-    }
-
-    return totalCount;
-}
-
-size_t StatGetterThread::GetTotalFilesSize() const
-{
-    size_t totalSize = 0;
-
-    for (const auto& pair : statTree_)
-    {
-        totalSize += pair.second.size;
-    }
-
-    return totalSize;
-}
-
-size_t StatGetterThread::GetAvgSizeAllFiles() const
-{
-    return GetTotalFilesSize() / GetTotalFilesCount();
-
-}
-
-size_t StatGetterThread::GetTotalGroupFilesCount(const QString& groupName) const
-{
-    auto it = statTree_.find(groupName);
-
-    if (it != statTree_.end())
-        return it->second.count;
-
-    return 0;
-}
-
-size_t StatGetterThread::GetTotalGroupFilesSize(const QString& groupName) const
-{
-    auto it = statTree_.find(groupName);
-
-    if (it != statTree_.end())
-        return it->second.size;
-
-    return 0;
-}
-
-size_t StatGetterThread::GetAvgGroupFilesSize(const QString& groupName) const
-{
-    return GetTotalGroupFilesSize(groupName) / GetTotalGroupFilesCount(groupName);
-}
-
-size_t StatGetterThread::GetSubdirsCount()
-{
-    QDir rootDir(path_);
-    rootDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-    return rootDir.count();
 }
 
 void StatGetterThread::FillPreAnalysisTree()
@@ -120,25 +58,16 @@ void StatGetterThread::FillStatTreeByPath()
         ++counter;
         emit setProgressValue(counter);
     }
-
-}
-
-void StatGetterThread::FillTable()
-{
-    statTable_->setRowCount(5);
-    statTable_->setColumnCount(2);
-//    statTable_->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
-    statTable_->setHorizontalHeaderLabels(QStringList() << "Name" << "Value");
 }
 
 /*static*/ size_t StatGetterThread::GetTotalGroupFilesCount(
-        const StatGetterThread::infovec_t& infoList)
+        const infovec_t& infoList)
 {
     return infoList.size();
 }
 
 /*static*/ size_t StatGetterThread::GetTotalGroupFilesSize(
-        const StatGetterThread::infovec_t& infoList)
+        const infovec_t& infoList)
 {
     size_t sum = 0;
 
@@ -164,7 +93,6 @@ void StatGetterThread::onStart()
     emit showProgressBar();
 
     FillStatTreeByPath();
-    FillTable();
 
     emit setProgressValue(totalValue);
 
@@ -186,15 +114,16 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
 {
     pathInWork_ = rootPath;
     assert(!pathInWork_.isEmpty());
-    // TODO: проверить отменяемость потока
+
     if (IsRunning())
     {
         RiseRunningThreadWarningMsg();
         return;
     }
 
-    StatGetterThread* statGetterThread =
-            new StatGetterThread(rootPath, GetProgBar(), GetLabel(), tableWidget_);
+    statTree_.clear();
+    StatGetterThread* statGetterThread = new StatGetterThread(rootPath, statTree_,
+        GetProgBar(), GetLabel());
 
     RunThread(statGetterThread);
 }
@@ -207,6 +136,81 @@ void StatGetter::SetView(QTableWidget* view)
     tableWidget_ = view;
 }
 
+size_t StatGetter::GetTotalFilesCount() const
+{
+    size_t totalCount = 0;
+
+    for (const auto& pair : statTree_)
+    {
+        totalCount += pair.second.count;
+    }
+
+    return totalCount;
+}
+
+
+size_t StatGetter::GetTotalFilesSize() const
+{
+    size_t totalSize = 0;
+
+    for (const auto& pair : statTree_)
+    {
+        totalSize += pair.second.size;
+    }
+
+    return totalSize;
+}
+
+size_t StatGetter::GetAvgSizeAllFiles() const
+{
+    return GetTotalFilesSize() / GetTotalFilesCount();
+
+}
+
+size_t StatGetter::GetTotalGroupFilesCount(const QString& groupName) const
+{
+    auto it = statTree_.find(groupName);
+
+    if (it != statTree_.end())
+        return it->second.count;
+
+    return 0;
+}
+
+size_t StatGetter::GetTotalGroupFilesSize(const QString& groupName) const
+{
+    auto it = statTree_.find(groupName);
+
+    if (it != statTree_.end())
+        return it->second.size;
+
+    return 0;
+}
+
+size_t StatGetter::GetAvgGroupFilesSize(const QString& groupName) const
+{
+    return GetTotalGroupFilesSize(groupName) / GetTotalGroupFilesCount(groupName);
+}
+
+size_t StatGetter::GetSubdirsCount()
+{
+    QDir rootDir(pathInWork_);
+    rootDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    return rootDir.count();
+}
+
+void StatGetter::FillWidgetTable()
+{
+    tableWidget_->setColumnCount(2);
+    tableWidget_->setHorizontalHeaderLabels(QStringList() << "Name" << "Value");
+    // количество групп + общая статистика
+    const int groupCount = statTree_.size() + 1;
+    const int blankLineCount = groupCount - 1;
+    const int rowOnGroup = 4;
+    const int rowCount = groupCount * rowOnGroup + blankLineCount;
+    tableWidget_->setRowCount(rowCount);
+}
+
 void StatGetter::onError(const QString& errorMsg)
 {
     Controller::onError(errorMsg);
@@ -214,7 +218,7 @@ void StatGetter::onError(const QString& errorMsg)
 
 void StatGetter::onWorkDone()
 {
-    // do work
+    FillWidgetTable();
     Controller::onWorkDone();
 }
 

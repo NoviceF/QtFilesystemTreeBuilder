@@ -63,6 +63,9 @@ MainWindow::MainWindow(QWidget *parent) :
     statGetter_->SetLabel(label);
     statGetter_->SetView(ui_->tableWidget);
 
+    ui_->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui_->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui_->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 MainWindow::~MainWindow()
