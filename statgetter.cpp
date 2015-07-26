@@ -13,7 +13,7 @@
 #include "statgetter.h"
 
 StatGetterThread::StatGetterThread(const QString& path, QProgressBar* progBar,
-    QLabel* label, QTableView* statTable, QObject* parent) :
+    QLabel* label, QTableWidget* statTable, QObject* parent) :
     IProgressWorker(progBar, label, parent),
     path_(path),
     abort_(false),
@@ -183,11 +183,9 @@ void StatGetterThread::onAbort()
 ///
 /// \brief StatGetter
 ///
-StatGetter::StatGetter(QTableView* tableView, QObject* parent) :
-    Controller(parent),
-    tableView_(tableView)
+StatGetter::StatGetter(QObject* parent) :
+    Controller(parent)
 {
-    assert(tableView_);
 }
 
 void StatGetter::GetStatsForPath(const QString& rootPath)
@@ -209,7 +207,7 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     RunThread(statGetterThread);
 }
 
-void StatGetter::SetView(QTableView* view)
+void StatGetter::SetView(QTableWidget* view)
 {
     if (!view)
         throw std::runtime_error("StatGetter::SetView: view is null.");
@@ -217,7 +215,7 @@ void StatGetter::SetView(QTableView* view)
      tableView_ = view;
 }
 
-QTableView*StatGetter::GetView()
+QTableWidget* StatGetter::GetView()
 {
     assert(tableView_);
     return tableView_;

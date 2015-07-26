@@ -14,7 +14,7 @@ MainWindow::MainWindow(QWidget *parent) :
     ui_(new Ui::MainWindow),
     fsComboModel_(new QFileSystemModel(this)),
     fsTreeModel_(new QFileSystemModel(this)),
-    statGetter_(new StatGetter(ui_->tableView, this)),
+    statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this))
 
 {
@@ -61,7 +61,7 @@ MainWindow::MainWindow(QWidget *parent) :
 
     statGetter_->SetProgBar(progBar);
     statGetter_->SetLabel(label);
-    statGetter_->SetView(ui_->tableView);
+    statGetter_->SetView(ui_->tableWidget);
 
 }
 

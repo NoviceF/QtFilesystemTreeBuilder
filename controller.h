@@ -3,7 +3,6 @@
 
 #include <QAbstractItemView>
 #include <QObject>
-#include <QTableView>
 #include <QThread>
 
 #include <progressworker.h>

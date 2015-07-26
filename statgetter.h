@@ -2,7 +2,7 @@
 #define STATGETTER_H
 
 #include <QFileInfo>
-#include <QTableView>
+#include <QTableWidget>
 
 #include <controller.h>
 
@@ -23,7 +23,7 @@ public:
 
 public:
     StatGetterThread(const QString& path, QProgressBar* progBar,
-        QLabel* label, QTableView* statTable, QObject* parent = 0);
+        QLabel* label, QTableWidget* statTable, QObject* parent = 0);
 
     size_t GetTotalFilesCount() const;
     size_t GetTotalFilesSize() const;
@@ -52,7 +52,7 @@ private:
     QString path_;
     bool abort_;
     stattree_t statTree_;
-    QTableView* statTable_;
+    QTableWidget* statTable_;
 };
 
 class StatGetter : public Controller
@@ -60,17 +60,17 @@ class StatGetter : public Controller
     Q_OBJECT
 
 public:
-    explicit StatGetter(QTableView* tableView, QObject* parent = 0);
+    explicit StatGetter(QObject* parent = 0);
     void GetStatsForPath(const QString& rootPath);
-    virtual void SetView(QTableView* view);
-    virtual QTableView* GetView();
+    void SetView(QTableWidget* view);
+    QTableWidget* GetView();
 
 public slots:
     virtual void onError(const QString& errorMsg);
     virtual void onWorkDone();
 
 private:
-    QTableView* tableView_;
+    QTableWidget* tableView_;
     QString pathInWork_;
 };
 
