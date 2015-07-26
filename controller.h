@@ -14,7 +14,7 @@ class Controller : public QObject
 public:
     bool IsRunning() { return running_; }
     void RunThread(IProgressWorker* worker);
-    bool RiseRunningThreadWarningMsg();
+    void RiseRunningThreadWarningMsg();
     void SetProgBar(QProgressBar* progBar);
     QProgressBar* GetProgBar();
     void SetLabel(QLabel* label);
@@ -31,7 +31,6 @@ private:
     void RiseErrorMsg(const QString& msg);
 
 signals:
-    void abort();
     void closeMsgBox();
 
 public slots:

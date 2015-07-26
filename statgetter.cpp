@@ -16,7 +16,6 @@ StatGetterThread::StatGetterThread(const QString& path, QProgressBar* progBar,
     QLabel* label, QTableWidget* statTable, QObject* parent) :
     IProgressWorker(progBar, label, parent),
     path_(path),
-    abort_(false),
     statTable_(statTable)
 {
     if (path_.isEmpty())
@@ -98,10 +97,6 @@ void StatGetterThread::FillPreAnalysisTree()
     while (it.hasNext())
     {
         QCoreApplication::processEvents();
-
-        if (abort_)
-            return;
-
         QFileInfo fileInfo(it.next());
         preAnalysisTree_[fileInfo.suffix()].push_back(fileInfo);
     }
@@ -113,11 +108,6 @@ void StatGetterThread::FillStatTreeByPath()
 
     for (auto pair : preAnalysisTree_)
     {
-        QCoreApplication::processEvents();
-
-        if (abort_)
-            return;
-
         auto groupName = pair.first;
         auto groupStats = pair.second;
 
@@ -131,25 +121,14 @@ void StatGetterThread::FillStatTreeByPath()
         emit setProgressValue(counter);
     }
 
-//    qDebug() << "path: " << path_;
+}
 
-//    for (auto node : statTree_)
-//    {
-//        qDebug() << "node name: " << node.first;
-//        qDebug() << "   " << "node element count: " << node.second.count
-//                 << " " << "size of node elements " << node.second.size
-//                 << " " << "avg group file size "
-//                 << GetAvgGroupFilesSize(node.first);
-//        qDebug() << "   " << "Total files count by group name: "
-//                 << GetTotalGroupFilesCount(node.first);
-//        qDebug() << "   " << "Total files size by group name: "
-//                 << GetTotalGroupFilesSize(node.first) << "\n";
-//    }
-
-//    qDebug() << "   " << "total file count: " << GetTotalFilesCount();
-//    qDebug() << "   " << "total file size: " << GetTotalFilesSize();
-//    qDebug() << "   " << "Avg size of all files: " << GetAvgSizeAllFiles();
-
+void StatGetterThread::FillTable()
+{
+    statTable_->setRowCount(5);
+    statTable_->setColumnCount(2);
+//    statTable_->setSizeAdjustPolicy(QTableWidget::AdjustToContents);
+    statTable_->setHorizontalHeaderLabels(QStringList() << "Name" << "Value");
 }
 
 /*static*/ size_t StatGetterThread::GetTotalGroupFilesCount(
@@ -175,7 +154,6 @@ void StatGetterThread::onStart()
 {
     setLabel("Retrieving files count..");
     emit showLabel();
-    QThread::msleep(2000);
     FillPreAnalysisTree();
     const size_t totalValue = preAnalysisTree_.size();
 
@@ -185,30 +163,15 @@ void StatGetterThread::onStart()
     emit setProgressValue(0);
     emit showProgressBar();
 
-    while (!abort_)
-    {
-        QThread::msleep(5000);
-        QCoreApplication::processEvents();
-    }
+    FillStatTreeByPath();
+    FillTable();
 
-//    FillStatTreeByPath();
-
-    if (!abort_)
-        emit setProgressValue(totalValue);
+    emit setProgressValue(totalValue);
 
     emit hideLabel();
     emit hideProgressBar();
 
     emit finished();
-}
-
-void StatGetterThread::onAbort()
-{
-    //TODO: проверять
-    if (!abort_)
-        abort_ = true;
-
-    emit error("Abort called");
 }
 
 ///
@@ -226,14 +189,12 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     // TODO: проверить отменяемость потока
     if (IsRunning())
     {
-        if (RiseRunningThreadWarningMsg())
-           emit abort();
-        else
-            return;
+        RiseRunningThreadWarningMsg();
+        return;
     }
 
     StatGetterThread* statGetterThread =
-            new StatGetterThread(rootPath, GetProgBar(), GetLabel(), tableView_);
+            new StatGetterThread(rootPath, GetProgBar(), GetLabel(), tableWidget_);
 
     RunThread(statGetterThread);
 }
@@ -243,13 +204,7 @@ void StatGetter::SetView(QTableWidget* view)
     if (!view)
         throw std::runtime_error("StatGetter::SetView: view is null.");
 
-     tableView_ = view;
-}
-
-QTableWidget* StatGetter::GetView()
-{
-    assert(tableView_);
-    return tableView_;
+    tableWidget_ = view;
 }
 
 void StatGetter::onError(const QString& errorMsg)

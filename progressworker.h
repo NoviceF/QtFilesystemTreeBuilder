@@ -27,7 +27,6 @@ signals:
 
 public slots:
     virtual void onStart() = 0;
-    virtual void onAbort() = 0;
 };
 
 #endif // PROGRESSWORKER_H

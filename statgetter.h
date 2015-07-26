@@ -38,17 +38,16 @@ public:
 private:
     void FillPreAnalysisTree();
     void FillStatTreeByPath();
+    void FillTable();
 
     static size_t GetTotalGroupFilesCount(const infovec_t& infoList);
     static size_t GetTotalGroupFilesSize(const infovec_t& infoList);
 
 public slots:
     virtual void onStart();
-    virtual void onAbort();
 
 private:
     QString path_;
-    bool abort_;
     fstree_t preAnalysisTree_;
     stattree_t statTree_;
     QTableWidget* statTable_;
@@ -62,14 +61,13 @@ public:
     explicit StatGetter(QObject* parent = 0);
     void GetStatsForPath(const QString& rootPath);
     void SetView(QTableWidget* view);
-    QTableWidget* GetView();
 
 public slots:
     virtual void onError(const QString& errorMsg);
     virtual void onWorkDone();
 
 private:
-    QTableWidget* tableView_;
+    QTableWidget* tableWidget_;
     QString pathInWork_;
 };
 

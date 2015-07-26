@@ -86,10 +86,8 @@ void DirTreeBuilder::BuildDirTree(const QString& path)
 {
     if (IsRunning())
     {
-        if (RiseRunningThreadWarningMsg())
-           emit abort();
-        else
-            return;
+        RiseRunningThreadWarningMsg();
+        return;
     }
 
     TreeBuilderThread* builderThread = new TreeBuilderThread(path, progBar_, label_);
