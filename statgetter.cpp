@@ -210,9 +210,18 @@ void StatGetter::FillWidgetTable()
     const int rowCount = groupCount * rowOnGroup + blankLineCount;
     tableWidget_->setRowCount(rowCount);
 
-    for (auto it : statTree_)
-    {
+    int rowNumber = 0;
+    const int nameCol = 0;
+    const int valueCol = 1;
 
+
+    for (auto statPair : statTree_)
+    {
+        tableWidget_->itemAt(rowNumber, nameCol)->setData(Qt::UserRole,
+                                                          QVariant());
+//        tableWidget_->itemAt(rowNumber, nameCol)->setData(Qt::UserRole,
+//                                                          QVariant(statPair.first));
+        ++rowNumber;
     }
 
 }
