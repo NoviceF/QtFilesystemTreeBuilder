@@ -19,7 +19,10 @@ TreeBuilderThread::TreeBuilderThread(const QString& rootPath,
     abort_(false)
 {
     if (root_.isEmpty())
-        throw std::runtime_error("Root path was not setted.");
+    {
+        throw std::runtime_error("TreeBuilderThread::TreeBuilderThread: Root "
+                                 "path was not setted.");
+    }
 }
 void TreeBuilderThread::dirWasLoaded(const QString&)
 {
@@ -31,7 +34,6 @@ void TreeBuilderThread::onStart()
 {
     setLabel("Building directory tree..");
 
-    //TODO: нужен qdiriterator и последовательный обход
     const size_t totalValue = 0;
     setProgressRange(0, totalValue);
 

@@ -36,10 +36,8 @@ public:
     size_t GetSubdirsCount();
 
 private:
-    stattree_t FillStatTreeByPath();
-
-    size_t GetTotalFilesCount();
-    size_t GetTotalFilesSize();
+    void FillPreAnalysisTree();
+    void FillStatTreeByPath();
 
     static size_t GetTotalGroupFilesCount(const infovec_t& infoList);
     static size_t GetTotalGroupFilesSize(const infovec_t& infoList);
@@ -51,6 +49,7 @@ public slots:
 private:
     QString path_;
     bool abort_;
+    fstree_t preAnalysisTree_;
     stattree_t statTree_;
     QTableWidget* statTable_;
 };

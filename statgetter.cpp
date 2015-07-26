@@ -20,12 +20,14 @@ StatGetterThread::StatGetterThread(const QString& path, QProgressBar* progBar,
     statTable_(statTable)
 {
     if (path_.isEmpty())
-        throw std::runtime_error("Path was not setted.");
+    {
+        throw std::runtime_error("StatGetterThread::StatGetterThread: Path "
+                                 "was not setted.");
+    }
 }
 
 size_t StatGetterThread::GetTotalFilesCount() const
 {
-    // TODO: проверить
     size_t totalCount = 0;
 
     for (const auto& pair : statTree_)
@@ -38,7 +40,6 @@ size_t StatGetterThread::GetTotalFilesCount() const
 
 size_t StatGetterThread::GetTotalFilesSize() const
 {
-    // TODO: проверить
     size_t totalSize = 0;
 
     for (const auto& pair : statTree_)
@@ -51,14 +52,12 @@ size_t StatGetterThread::GetTotalFilesSize() const
 
 size_t StatGetterThread::GetAvgSizeAllFiles() const
 {
-    // TODO: проверить
     return GetTotalFilesSize() / GetTotalFilesCount();
 
 }
 
 size_t StatGetterThread::GetTotalGroupFilesCount(const QString& groupName) const
 {
-    // TODO: проверить
     auto it = statTree_.find(groupName);
 
     if (it != statTree_.end())
@@ -69,7 +68,6 @@ size_t StatGetterThread::GetTotalGroupFilesCount(const QString& groupName) const
 
 size_t StatGetterThread::GetTotalGroupFilesSize(const QString& groupName) const
 {
-    // TODO: проверить
     auto it = statTree_.find(groupName);
 
     if (it != statTree_.end())
@@ -80,7 +78,6 @@ size_t StatGetterThread::GetTotalGroupFilesSize(const QString& groupName) const
 
 size_t StatGetterThread::GetAvgGroupFilesSize(const QString& groupName) const
 {
-    // TODO: проверить
     return GetTotalGroupFilesSize(groupName) / GetTotalGroupFilesCount(groupName);
 }
 
@@ -91,27 +88,36 @@ size_t StatGetterThread::GetSubdirsCount()
     return rootDir.count();
 }
 
-StatGetterThread::stattree_t StatGetterThread::FillStatTreeByPath()
+void StatGetterThread::FillPreAnalysisTree()
 {
-    assert(QDir::isAbsolutePath(path_));
     assert(!path_.isEmpty());
-
-    fstree_t fsTree;
 
     QDirIterator it(path_, QStringList() << "*", QDir::Files,
                     QDirIterator::Subdirectories);
 
     while (it.hasNext())
     {
-//        qDebug() << "it next = " << it.next();
+        QCoreApplication::processEvents();
+
+        if (abort_)
+            return;
+
         QFileInfo fileInfo(it.next());
-        fsTree[fileInfo.suffix()].push_back(fileInfo);
+        preAnalysisTree_[fileInfo.suffix()].push_back(fileInfo);
     }
+}
 
-    stattree_t result;
+void StatGetterThread::FillStatTreeByPath()
+{
+    int counter = 0;
 
-    for (auto pair : fsTree)
+    for (auto pair : preAnalysisTree_)
     {
+        QCoreApplication::processEvents();
+
+        if (abort_)
+            return;
+
         auto groupName = pair.first;
         auto groupStats = pair.second;
 
@@ -119,16 +125,31 @@ StatGetterThread::stattree_t StatGetterThread::FillStatTreeByPath()
         const size_t groupSize(GetTotalGroupFilesSize(groupStats));
         GroupStats stats = {elementsCount, groupSize};
 
-        result.insert(std::make_pair(groupName, stats));
+        statTree_.insert(std::make_pair(groupName, stats));
+
+        ++counter;
+        emit setProgressValue(counter);
     }
 
-    for (auto node : result)
-    {
-        qDebug() << node.first;
-        qDebug() << "   " << node.second.count << " " << node.second.size;
-    }
+//    qDebug() << "path: " << path_;
 
-    return result;
+//    for (auto node : statTree_)
+//    {
+//        qDebug() << "node name: " << node.first;
+//        qDebug() << "   " << "node element count: " << node.second.count
+//                 << " " << "size of node elements " << node.second.size
+//                 << " " << "avg group file size "
+//                 << GetAvgGroupFilesSize(node.first);
+//        qDebug() << "   " << "Total files count by group name: "
+//                 << GetTotalGroupFilesCount(node.first);
+//        qDebug() << "   " << "Total files size by group name: "
+//                 << GetTotalGroupFilesSize(node.first) << "\n";
+//    }
+
+//    qDebug() << "   " << "total file count: " << GetTotalFilesCount();
+//    qDebug() << "   " << "total file size: " << GetTotalFilesSize();
+//    qDebug() << "   " << "Avg size of all files: " << GetAvgSizeAllFiles();
+
 }
 
 /*static*/ size_t StatGetterThread::GetTotalGroupFilesCount(
@@ -152,18 +173,28 @@ StatGetterThread::stattree_t StatGetterThread::FillStatTreeByPath()
 
 void StatGetterThread::onStart()
 {
-    setLabel("Calculating statistics..");
+    setLabel("Retrieving files count..");
+    emit showLabel();
+    QThread::msleep(2000);
+    FillPreAnalysisTree();
+    const size_t totalValue = preAnalysisTree_.size();
 
-    //TODO: нужен qdiriterator и последовательный обход
-    const size_t totalValue = 0;
+    setLabel("Calculating statistics..");
     setProgressRange(0, totalValue);
 
-    emit showLabel();
+    emit setProgressValue(0);
     emit showProgressBar();
 
-    FillStatTreeByPath();
+    while (!abort_)
+    {
+        QThread::msleep(5000);
+        QCoreApplication::processEvents();
+    }
 
-    emit setProgressValue(totalValue);
+//    FillStatTreeByPath();
+
+    if (!abort_)
+        emit setProgressValue(totalValue);
 
     emit hideLabel();
     emit hideProgressBar();
@@ -192,7 +223,7 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
 {
     pathInWork_ = rootPath;
     assert(!pathInWork_.isEmpty());
-
+    // TODO: проверить отменяемость потока
     if (IsRunning())
     {
         if (RiseRunningThreadWarningMsg())

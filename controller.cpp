@@ -39,39 +39,21 @@ void Controller::RemoveThread()
 {
     //    qDebug() << "remove thread";
     workerThread_.quit();
+    workerThread_.wait();
     running_ = false;
-//        workerThread_.wait();
 }
 
-bool Controller::RiseRunningThreadWarningMsg()
+void Controller::RiseRunningThreadWarningMsg()
 {
 //        qDebug() << "thread already running";
     QMessageBox msgBox;
     connect(this, SIGNAL(closeMsgBox()), &msgBox, SLOT(close()));
     msgBox.setIcon(QMessageBox::Question);
     msgBox.setText("Previous operation in progress now..");
-    msgBox.setInformativeText("Do you want to interrupt operation?");
-    msgBox.setStandardButtons(QMessageBox::Yes | QMessageBox::No);
-    msgBox.setDefaultButton(QMessageBox::No);
+    msgBox.setStandardButtons(QMessageBox::Ok);
+    msgBox.setDefaultButton(QMessageBox::Ok);
 
-    int ret = msgBox.exec();
-
-    switch (ret)
-    {
-        case QMessageBox::Yes:
-            // interrupt
-            return true;
-            break;
-        case QMessageBox::No:
-            // Don't interrupt
-            return false;
-            break;
-        default:
-            assert(false);
-            return false;
-            // should never be reached
-            break;
-    }
+    msgBox.exec();
 }
 
 void Controller::SetProgBar(QProgressBar* progBar)
@@ -110,7 +92,7 @@ QLabel* Controller::GetLabel()
 
 /*virtual*/ void Controller::SetView(QAbstractItemView*)
 {
-    throw std::runtime_error(" Controller::SetView: Not implemented.");
+    throw std::runtime_error("Controller::SetView: Not implemented.");
 }
 
 /*virtual*/ QAbstractItemView* Controller::GetView()
