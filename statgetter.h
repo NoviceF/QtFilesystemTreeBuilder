@@ -16,6 +16,10 @@ typedef QVector<QFileInfo> infovec_t;
 typedef std::map<QString,infovec_t> fstree_t;
 typedef std::map<QString, GroupStats> stattree_t;
 
+size_t GetTotalGroupFilesCount(const infovec_t& infoList);
+size_t GetTotalGroupFilesSize(const infovec_t& infoList);
+
+
 class StatGetterThread : public IProgressWorker
 {
     Q_OBJECT
@@ -27,9 +31,6 @@ public:
 private:
     void FillPreAnalysisTree();
     void FillStatTreeByPath();
-
-    static size_t GetTotalGroupFilesCount(const infovec_t& infoList);
-    static size_t GetTotalGroupFilesSize(const infovec_t& infoList);
 
 public slots:
     virtual void onStart();
@@ -53,9 +54,9 @@ public:
     size_t GetTotalFilesSize() const;
     size_t GetAvgSizeAllFiles() const;
 
-    size_t GetTotalGroupFilesCount(const QString& groupName) const;
-    size_t GetTotalGroupFilesSize(const QString& groupName) const;
-    size_t GetAvgGroupFilesSize(const QString& groupName) const;
+//    size_t GetTotalGroupFilesCount(const QString& groupName) const;
+//    size_t GetTotalGroupFilesSize(const QString& groupName) const;
+//    size_t GetAvgGroupFilesSize(const QString& groupName) const;
 
     size_t GetSubdirsCount();
 

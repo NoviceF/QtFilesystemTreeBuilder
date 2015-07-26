@@ -12,6 +12,25 @@
 
 #include "statgetter.h"
 
+size_t GetTotalGroupFilesCount(
+        const infovec_t& infoList)
+{
+    return infoList.size();
+}
+
+size_t GetTotalGroupFilesSize(
+        const infovec_t& infoList)
+{
+    size_t sum = 0;
+
+    for (const QFileInfo& fileInfo : infoList)
+    {
+        sum += fileInfo.size();
+    }
+
+    return sum;
+}
+
 StatGetterThread::StatGetterThread(const QString& path, stattree_t& statTree,
     QProgressBar* progBar, QLabel* label, QObject* parent) :
     IProgressWorker(progBar, label, parent),
@@ -58,25 +77,6 @@ void StatGetterThread::FillStatTreeByPath()
         ++counter;
         emit setProgressValue(counter);
     }
-}
-
-/*static*/ size_t StatGetterThread::GetTotalGroupFilesCount(
-        const infovec_t& infoList)
-{
-    return infoList.size();
-}
-
-/*static*/ size_t StatGetterThread::GetTotalGroupFilesSize(
-        const infovec_t& infoList)
-{
-    size_t sum = 0;
-
-    for (const QFileInfo& fileInfo : infoList)
-    {
-        sum += fileInfo.size();
-    }
-
-    return sum;
 }
 
 void StatGetterThread::onStart()
@@ -167,30 +167,30 @@ size_t StatGetter::GetAvgSizeAllFiles() const
 
 }
 
-size_t StatGetter::GetTotalGroupFilesCount(const QString& groupName) const
-{
-    auto it = statTree_.find(groupName);
+//size_t StatGetter::GetTotalGroupFilesCount(const QString& groupName) const
+//{
+//    auto it = statTree_.find(groupName);
 
-    if (it != statTree_.end())
-        return it->second.count;
+//    if (it != statTree_.end())
+//        return it->second.count;
 
-    return 0;
-}
+//    return 0;
+//}
 
-size_t StatGetter::GetTotalGroupFilesSize(const QString& groupName) const
-{
-    auto it = statTree_.find(groupName);
+//size_t StatGetter::GetTotalGroupFilesSize(const QString& groupName) const
+//{
+//    auto it = statTree_.find(groupName);
 
-    if (it != statTree_.end())
-        return it->second.size;
+//    if (it != statTree_.end())
+//        return it->second.size;
 
-    return 0;
-}
+//    return 0;
+//}
 
-size_t StatGetter::GetAvgGroupFilesSize(const QString& groupName) const
-{
-    return GetTotalGroupFilesSize(groupName) / GetTotalGroupFilesCount(groupName);
-}
+//size_t StatGetter::GetAvgGroupFilesSize(const QString& groupName) const
+//{
+//    return GetTotalGroupFilesSize(groupName) / GetTotalGroupFilesCount(groupName);
+//}
 
 size_t StatGetter::GetSubdirsCount()
 {
@@ -209,6 +209,12 @@ void StatGetter::FillWidgetTable()
     const int rowOnGroup = 4;
     const int rowCount = groupCount * rowOnGroup + blankLineCount;
     tableWidget_->setRowCount(rowCount);
+
+    for (auto it : statTree_)
+    {
+
+    }
+
 }
 
 void StatGetter::onError(const QString& errorMsg)
