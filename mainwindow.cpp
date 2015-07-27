@@ -9,7 +9,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
-MainWindow::MainWindow(QWidget *parent) :
+MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
     fsComboModel_(new QFileSystemModel(this)),
@@ -25,27 +25,23 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
             SLOT(setTreeRootIndex(int)));
 
-    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
-            SLOT(processStatRequest(QModelIndex)));
+//    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
+//            SLOT(processStatRequest(QModelIndex)));
 
      const QString selectedPath("");
 //    const QString selectedPath("/home/novice/proj/cpp/dirtest");
 
     ui_->comboBox->blockSignals(true);
+    // принимаем сигналы только после загрузки ui
+    QTimer::singleShot(0, this, SLOT(unblockCombo()));
+
     fsComboModel_->setFilter(QDir::Drives);
 //    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     fsComboModel_->setRootPath(selectedPath);
 
-    // принимаем сигналы только после загрузки ui
-    QTimer::singleShot(0, this, SLOT(unblockCombo()));
-
     fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-//    fsTreeModel_->setRootPath(selectedPath);
-
-//    ui_->treeView->setModel(fsTreeModel_);
 
     QProgressBar* progBar = new QProgressBar;
-
     progBar->setAlignment(Qt::AlignRight);
 
     QLabel* label = new QLabel;
@@ -73,12 +69,22 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::setTreeRootIndex(int index)
+void MainWindow::setTreeRootIndex(int)
 {
-    assert(ui_->comboBox->currentIndex() == index);
-
     const QString itemName = ui_->comboBox->currentText();
     QString selectedPath;
+
+    QStringList list;
+
+    for (QFileInfo info : QDir::drives())
+    {
+        list.push_back(info.absoluteFilePath());
+    }
+
+    if (list.contains(itemName))
+    {
+        qDebug() << "contain";
+    }
 
     if (fsComboModel_->rootPath().isEmpty())
         selectedPath = itemName + "/";
