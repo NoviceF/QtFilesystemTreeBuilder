@@ -28,12 +28,12 @@ MainWindow::MainWindow(QWidget *parent) :
     connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
             SLOT(processStatRequest(QModelIndex)));
 
-//     const QString selectedPath("");
-    const QString selectedPath("/home/novice/proj/cpp/dirtest");
+     const QString selectedPath("");
+//    const QString selectedPath("/home/novice/proj/cpp/dirtest");
 
     ui_->comboBox->blockSignals(true);
-//    fsComboModel_->setFilter(QDir::Drives);
-    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    fsComboModel_->setFilter(QDir::Drives);
+//    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     fsComboModel_->setRootPath(selectedPath);
 
     // принимаем сигналы только после загрузки ui

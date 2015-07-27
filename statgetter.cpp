@@ -96,11 +96,13 @@ void StatGetterThread::onStart()
     FillPreAnalysisTree();
     const size_t totalValue = preAnalysisTree_.size();
 
-    setLabel("Calculating statistics..");
-    setProgressRange(0, totalValue);
-
+    emit setProgressRange(0, 0);
     emit setProgressValue(0);
     emit showProgressBar();
+
+    setLabel("Calculating statistics..");
+    emit setProgressRange(0, totalValue);
+    emit setProgressValue(0);
 
     FillStatTreeByPath();
     GetSubdirsCount();
