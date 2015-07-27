@@ -26,7 +26,7 @@ private slots:
     void setTreeRootIndex(int);
     void processStatRequest(const QModelIndex& index);
     void initTreeRoot(const QString& path);
-    void unblockCombo();
+//    void unblockCombo();
 
 private:
     void SetPositionCenter();

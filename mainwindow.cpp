@@ -30,14 +30,18 @@ MainWindow::MainWindow(QWidget* parent) :
 
      const QString selectedPath("");
 //    const QString selectedPath("/home/novice/proj/cpp/dirtest");
+//    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 
-    ui_->comboBox->blockSignals(true);
-    // принимаем сигналы только после загрузки ui
-    QTimer::singleShot(0, this, SLOT(unblockCombo()));
+//    ui_->comboBox->blockSignals(true);
+//    // принимаем сигналы только после загрузки ui
+//    QTimer::singleShot(0, this, SLOT(unblockCombo()));
 
     fsComboModel_->setFilter(QDir::Drives);
-//    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
     fsComboModel_->setRootPath(selectedPath);
+
+    ui_->comboBox->setModel(fsComboModel_);
+    ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+    ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
 
     fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
 
@@ -74,23 +78,13 @@ void MainWindow::setTreeRootIndex(int)
     const QString itemName = ui_->comboBox->currentText();
     QString selectedPath;
 
-    QStringList list;
+//    for (QFileInfo info : QDir::drives())
+//    {
+//        if (info.absoluteFilePath() == itemName)
+//            return;
+//    }
 
-    for (QFileInfo info : QDir::drives())
-    {
-        list.push_back(info.absoluteFilePath());
-    }
-
-    if (list.contains(itemName))
-    {
-        qDebug() << "contain";
-    }
-
-    if (fsComboModel_->rootPath().isEmpty())
-        selectedPath = itemName + "/";
-    else
-        selectedPath = fsComboModel_->rootPath() + "/" + itemName;
-
+    selectedPath = fsComboModel_->rootPath() + "/" + itemName;
     selectedPath = QDir::toNativeSeparators(selectedPath);
 
     if (ui_->treeView->model() == nullptr)
@@ -123,20 +117,21 @@ void MainWindow::processStatRequest(const QModelIndex& index)
 
 void MainWindow::initTreeRoot(const QString& path)
 {
-    ui_->treeView->setModel(fsTreeModel_);
     fsTreeModel_->setRootPath(path);
+    ui_->treeView->setModel(fsTreeModel_);
+    ui_->treeView->setRootIndex(fsTreeModel_->index(fsTreeModel_->rootPath()));
 
 //    treeBuilder_->BuildDirTree(path);
 }
 
-void MainWindow::unblockCombo()
-{
-    ui_->comboBox->setModel(fsComboModel_);
-    ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
+//void MainWindow::unblockCombo()
+//{
+//    ui_->comboBox->setModel(fsComboModel_);
+//    ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
+//    ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
 
-    ui_->comboBox->blockSignals(false);
-}
+//    ui_->comboBox->blockSignals(false);
+//}
 
 void MainWindow::SetPositionCenter()
 {
