@@ -73,33 +73,25 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::setTreeRootIndex(int)
+void MainWindow::setTreeRootIndex(int index)
 {
-    const QString itemName = ui_->comboBox->currentText();
-    QString selectedPath;
-
-//    for (QFileInfo info : QDir::drives())
-//    {
-//        if (info.absoluteFilePath() == itemName)
-//            return;
-//    }
-
-    selectedPath = fsComboModel_->rootPath() + "/" + itemName;
-    selectedPath = QDir::toNativeSeparators(selectedPath);
+//    const QString itemName = ui_->comboBox->itemText(index);
+    const int row = index;
+    const int col = 0;
+    const QModelIndex modelIndex = fsComboModel_->index(row, col);
+    const QString selectedPath =
+            fsComboModel_->fileInfo(modelIndex).absoluteFilePath();
 
     if (ui_->treeView->model() == nullptr)
     {
         fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-        fsTreeModel_->setRootPath(path);
+        fsTreeModel_->setRootPath(selectedPath);
         ui_->treeView->setModel(fsTreeModel_);
 
     //    treeBuilder_->BuildDirTree(path);
     }
 
-    //TODO: проверить под виндой
-    QDir selectedDir(selectedPath);
-
-    QModelIndex fsIndex = fsTreeModel_->index(selectedDir.absolutePath());
+    QModelIndex fsIndex = fsTreeModel_->index(selectedPath);
 
     ui_->treeView->setRootIndex(fsIndex);
     ui_->treeView->setCurrentIndex(fsIndex);

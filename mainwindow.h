@@ -23,10 +23,8 @@ public:
     ~MainWindow();
 
 private slots:
-    void setTreeRootIndex(int);
+    void setTreeRootIndex(int index);
     void processStatRequest(const QModelIndex& index);
-    void initTreeRoot(const QString& path);
-//    void unblockCombo();
 
 private:
     void SetPositionCenter();
