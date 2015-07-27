@@ -12,17 +12,27 @@
 
 #include "statgetter.h"
 
-StatGetterThread::StatGetterThread(const QString& path, stattree_t& statTree,
+StatGetterThread::StatGetterThread(const QString& path, StatsCont& statCont,
     QProgressBar* progBar, QLabel* label, QObject* parent) :
     IProgressWorker(progBar, label, parent),
     path_(path),
-    statTree_(statTree)
+    subdirsInPathDir_(statCont.subdirsCount),
+    statTree_(statCont.statTree)
 {
     if (path_.isEmpty())
     {
         throw std::runtime_error("StatGetterThread::StatGetterThread: Path "
                                  "was not setted.");
     }
+}
+
+void StatGetterThread::GetSubdirsCount()
+{
+    subdirsInPathDir_ = 0;
+
+    QDir rootDir(path_);
+    rootDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    subdirsInPathDir_ = rootDir.count();
 }
 
 void StatGetterThread::FillPreAnalysisTree()
@@ -93,6 +103,7 @@ void StatGetterThread::onStart()
     emit showProgressBar();
 
     FillStatTreeByPath();
+    GetSubdirsCount();
 
     emit setProgressValue(totalValue);
 
@@ -106,7 +117,8 @@ void StatGetterThread::onStart()
 /// \brief StatGetter
 ///
 StatGetter::StatGetter(QObject* parent) :
-    Controller(parent)
+    Controller(parent),
+    subdirsInCurPathCount_(0)
 {
 }
 
@@ -122,7 +134,10 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     }
 
     statTree_.clear();
-    StatGetterThread* statGetterThread = new StatGetterThread(rootPath, statTree_,
+    subdirsInCurPathCount_ = 0;
+    StatsCont cont {statTree_, subdirsInCurPathCount_};
+
+    StatGetterThread* statGetterThread = new StatGetterThread(rootPath, cont,
         GetProgBar(), GetLabel());
 
     RunThread(statGetterThread);
@@ -163,82 +178,70 @@ size_t StatGetter::GetTotalFilesSize() const
 
 size_t StatGetter::GetAvgSizeAllFiles() const
 {
-    return GetTotalFilesSize() / GetTotalFilesCount();
+    const int totalFilesCount = GetTotalFilesCount();
 
-}
-
-size_t StatGetter::GetSubdirsCount()
-{
-    QDir rootDir(pathInWork_);
-    rootDir.setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-    return rootDir.count();
+    if (totalFilesCount == 0)
+        return 0;
+    return GetTotalFilesSize() / totalFilesCount;
 }
 
 void StatGetter::FillWidgetTable()
 {
     tableWidget_->setColumnCount(2);
     tableWidget_->setHorizontalHeaderLabels(QStringList() << "Name" << "Value");
-    // количество групп + общая статистика
+    // количество групп + общая статистика + количество каталогов в текущем
     const int groupCount = statTree_.size() + 1;
     const int blankLineCount = groupCount - 1;
     const int rowOnGroup = 4;
-    const int rowCount = groupCount * rowOnGroup + blankLineCount;
+    const int spaceForDirsInCurDir = 2;
+    const int rowCount = groupCount * rowOnGroup + blankLineCount +
+            spaceForDirsInCurDir;
     tableWidget_->setRowCount(rowCount);
 
     int rowNumber = 0;
-    const int nameCol = 0;
-    const int valueCol = 1;
-
 
     for (auto statPair : statTree_)
     {
         const QString groupName = statPair.first.isEmpty() ?
                     "*no extention*" :
                     "*." + statPair.first;
-        tableWidget_->setItem(rowNumber, nameCol,
-            new QTableWidgetItem(groupName));
-        ++rowNumber;
 
-        tableWidget_->setItem(rowNumber, nameCol,
-            new QTableWidgetItem("Files count"));
-        tableWidget_->setItem(rowNumber, valueCol,
-            new QTableWidgetItem(QString::number(statPair.second.count)));
+        AddTableRow(rowNumber, groupName);
+        AddTableRow(rowNumber, "Files count", &statPair.second.count);
+        AddTableRow(rowNumber, "Files size", &statPair.second.size);
+        const size_t avgSize = statPair.second.size / statPair.second.count;
+        AddTableRow(rowNumber, "Avg size", &avgSize);
         ++rowNumber;
-
-        tableWidget_->setItem(rowNumber, nameCol,
-            new QTableWidgetItem("Files size"));
-        tableWidget_->setItem(rowNumber, valueCol,
-            new QTableWidgetItem(QString::number(statPair.second.size)));
-        ++rowNumber;
-
-        tableWidget_->setItem(rowNumber, nameCol,
-            new QTableWidgetItem("Avg size"));
-        tableWidget_->setItem(rowNumber, valueCol,
-            new QTableWidgetItem( QString::number(
-            statPair.second.size / statPair.second.count)) );
-        rowNumber += 2;
     }
 
-
-    tableWidget_->setItem(rowNumber, nameCol, new QTableWidgetItem("Total"));
+    AddTableRow(rowNumber, "Total");
+    const size_t totalFilesCount = GetTotalFilesCount();
+    AddTableRow(rowNumber, "Total files count", &totalFilesCount);
+    const size_t totalFilesSize = GetTotalFilesSize();
+    AddTableRow(rowNumber, "Total files count", &totalFilesSize);
+    const size_t avgSizeAllFiles = GetAvgSizeAllFiles();
+    AddTableRow(rowNumber, "Avg by all files size", &avgSizeAllFiles);
     ++rowNumber;
 
-    tableWidget_->setItem(rowNumber, nameCol,
-        new QTableWidgetItem("Total files count"));
-    tableWidget_->setItem(rowNumber, valueCol,
-        new QTableWidgetItem(QString::number(GetTotalFilesCount())));
-    ++rowNumber;
+    AddTableRow(rowNumber, "Subdirs count", &subdirsInCurPathCount_);
+}
 
-    tableWidget_->setItem(rowNumber, nameCol,
-        new QTableWidgetItem("Total files size"));
-    tableWidget_->setItem(rowNumber, valueCol,
-        new QTableWidgetItem(QString::number(GetTotalFilesSize())));
-    ++rowNumber;
+void StatGetter::AddTableRow(int& rowNumber, const QString& name,
+                             const size_t* value /*= nullptr*/)
+{
+    const int nameCol = 0;
+    const int valueCol = 1;
 
-    tableWidget_->setItem(rowNumber, nameCol,
-        new QTableWidgetItem("Avg by all files size"));
-    tableWidget_->setItem(rowNumber, valueCol,
-        new QTableWidgetItem(QString::number(GetAvgSizeAllFiles())));
+    tableWidget_->setItem(rowNumber, nameCol, new QTableWidgetItem(name));
+
+    if (value)
+    {
+        const QString stringValue = QString::number(*value);
+        tableWidget_->setItem(rowNumber, valueCol,
+                              new QTableWidgetItem(stringValue));
+    }
+
+    ++rowNumber;
 }
 
 void StatGetter::onError(const QString& errorMsg)
