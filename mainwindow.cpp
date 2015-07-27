@@ -22,19 +22,17 @@ MainWindow::MainWindow(QWidget* parent) :
 
     SetPositionCenter();
 
+    // set connections
     connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
             SLOT(setTreeRootIndex(int)));
 
 //    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
 //            SLOT(processStatRequest(QModelIndex)));
 
+    // init combobox
      const QString selectedPath("");
 //    const QString selectedPath("/home/novice/proj/cpp/dirtest");
 //    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-
-//    ui_->comboBox->blockSignals(true);
-//    // принимаем сигналы только после загрузки ui
-//    QTimer::singleShot(0, this, SLOT(unblockCombo()));
 
     fsComboModel_->setFilter(QDir::Drives);
     fsComboModel_->setRootPath(selectedPath);
@@ -43,8 +41,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
 
-    fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-
+    // init statusbar
     QProgressBar* progBar = new QProgressBar;
     progBar->setAlignment(Qt::AlignRight);
 
@@ -56,6 +53,12 @@ MainWindow::MainWindow(QWidget* parent) :
 
     progBar->hide();
 
+    // init table widget
+    ui_->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui_->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui_->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    // init worker class
     treeBuilder_->SetProgBar(progBar);
     treeBuilder_->SetLabel(label);
 
@@ -63,9 +66,6 @@ MainWindow::MainWindow(QWidget* parent) :
     statGetter_->SetLabel(label);
     statGetter_->SetView(ui_->tableWidget);
 
-    ui_->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui_->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui_->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
 }
 
 MainWindow::~MainWindow()
@@ -89,20 +89,17 @@ void MainWindow::setTreeRootIndex(int)
 
     if (ui_->treeView->model() == nullptr)
     {
-        initTreeRoot(selectedPath);
-//        return;
+        fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+        fsTreeModel_->setRootPath(path);
+        ui_->treeView->setModel(fsTreeModel_);
+
+    //    treeBuilder_->BuildDirTree(path);
     }
 
     //TODO: проверить под виндой
     QDir selectedDir(selectedPath);
 
     QModelIndex fsIndex = fsTreeModel_->index(selectedDir.absolutePath());
-
-    if (fsTreeModel_->canFetchMore(fsIndex))
-    {
-        // make sure the entries in the dir are loaded
-        fsTreeModel_->fetchMore(fsIndex);
-    }
 
     ui_->treeView->setRootIndex(fsIndex);
     ui_->treeView->setCurrentIndex(fsIndex);
@@ -114,24 +111,6 @@ void MainWindow::processStatRequest(const QModelIndex& index)
     const QString selectedPath = fsTreeModel_->fileInfo(index).absoluteFilePath();
     statGetter_->GetStatsForPath(selectedPath);
 }
-
-void MainWindow::initTreeRoot(const QString& path)
-{
-    fsTreeModel_->setRootPath(path);
-    ui_->treeView->setModel(fsTreeModel_);
-    ui_->treeView->setRootIndex(fsTreeModel_->index(fsTreeModel_->rootPath()));
-
-//    treeBuilder_->BuildDirTree(path);
-}
-
-//void MainWindow::unblockCombo()
-//{
-//    ui_->comboBox->setModel(fsComboModel_);
-//    ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-//    ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
-
-//    ui_->comboBox->blockSignals(false);
-//}
 
 void MainWindow::SetPositionCenter()
 {
