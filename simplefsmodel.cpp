@@ -1,4 +1,4 @@
-#include <QFileInfo>
+﻿#include <QFileInfo>
 #include <QDir>
 #include <algorithm>
 #include <QFileIconProvider>
@@ -11,7 +11,6 @@ SimpleFSModel::SimpleFSModel(QObject* parent) :
     QAbstractItemModel(parent),
     metaProvider_(new QFileIconProvider())
 {
-    fetchRootDirectory();
 }
 
 SimpleFSModel::~SimpleFSModel()
@@ -111,16 +110,6 @@ QVariant SimpleFSModel::data(const QModelIndex& index, int role) const
     switch (index.column()) {
     case NameColumn:
         return nameData(fileInfo, role);
-    case ModificationDateColumn:
-        if (role == Qt::DisplayRole) {
-            return fileInfo.lastModified();
-        }
-        break;
-    case SizeColumn:
-        if (role == Qt::DisplayRole) {
-            return fileInfo.isDir()? QVariant(): fileInfo.size();
-        }
-        break;
     default:
         break;
     }
@@ -130,8 +119,6 @@ QVariant SimpleFSModel::data(const QModelIndex& index, int role) const
 QVariant SimpleFSModel::nameData(const QFileInfo &fileInfo, int role) const
 {
     switch (role) {
-    case Qt::EditRole:
-        return fileInfo.fileName();
     case Qt::DisplayRole:
         if (fileInfo.isRoot()) {
             return fileInfo.absoluteFilePath();
@@ -142,6 +129,8 @@ QVariant SimpleFSModel::nameData(const QFileInfo &fileInfo, int role) const
         else {
             return fileInfo.completeBaseName();
         }
+    case Qt::EditRole:
+        return fileInfo.fileName();
     default:
         return QVariant();
     }
@@ -163,7 +152,8 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
     NodeInfo* parentInfo = static_cast<NodeInfo*>(parent.internalPointer());
     const QFileInfo& fileInfo = parentInfo->fileInfo;
     QDir dir = QDir(fileInfo.absoluteFilePath());
-    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::AllEntries | QDir::NoDotAndDotDot, QDir::Name);
+    QFileInfoList children = dir.entryInfoList(QStringList(),
+       QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
 
     beginInsertRows(parent, 0, children.size() - 1);
     parentInfo->children.reserve(children.size());
@@ -176,9 +166,12 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
     endInsertRows();
 }
 
-void SimpleFSModel::fetchRootDirectory()
+void SimpleFSModel::setRootPath(const QString& path)
 {
-    const QFileInfoList drives = QDir::drives();
+//    const QFileInfoList drives = QDir::drives();
+    QDir pathDir(path);
+    pathDir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
+    const QFileInfoList drives = pathDir.entryInfoList();
     qCopy(drives.begin(), drives.end(), std::back_inserter(nodes_));
 }
 

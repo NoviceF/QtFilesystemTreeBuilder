@@ -1,4 +1,4 @@
-#ifndef SIMPLEFSMODEL_H
+﻿#ifndef SIMPLEFSMODEL_H
 #define SIMPLEFSMODEL_H
 
 
@@ -14,6 +14,8 @@ class SimpleFSModel : public QAbstractItemModel
 public:
     SimpleFSModel(QObject* parent);
     ~SimpleFSModel();
+
+    void setRootPath(const QString& path);
 
     QModelIndex index(int row, int column, const QModelIndex& parent) const;
     QModelIndex parent(const QModelIndex& child) const;
@@ -33,9 +35,6 @@ private:
     {
         RamificationColumn,
         NameColumn = RamificationColumn,
-        ModificationDateColumn,
-        SizeColumn,
-        TypeColumn,
         ColumnCount
     };
 
@@ -44,7 +43,6 @@ private:
     NodeInfoList nodes_;
     QScopedPointer<QFileIconProvider> metaProvider_;
 
-    void fetchRootDirectory();
     int findRow(const NodeInfo* nodeInfo) const;
     QVariant nameData(const QFileInfo& fileInfo, int role) const;
 };

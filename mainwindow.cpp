@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
     fsComboModel_(new QFileSystemModel(this)),
-    fsTreeModel_(new SimpleFSModel(this)),
+    fsTreeModel_(nullptr),
     statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this))
 {
@@ -21,12 +21,19 @@ MainWindow::MainWindow(QWidget* parent) :
 
     SetPositionCenter();
 
-    // init combobox
-     const QString selectedPath("");
-//    const QString selectedPath("/home/novice/proj/cpp/dirtest");
-//    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    // set connections
+    connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(setTreeRootIndex(int)));
 
-    fsComboModel_->setFilter(QDir::Drives);
+    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
+            SLOT(processStatRequest(QModelIndex)));
+
+    // init combobox
+//     const QString selectedPath("");
+    const QString selectedPath("/home/novice/proj/cpp/dirtest");
+    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+
+//    fsComboModel_->setFilter(QDir::Drives);
     fsComboModel_->setRootPath(selectedPath);
 
     ui_->comboBox->setModel(fsComboModel_);
@@ -34,7 +41,7 @@ MainWindow::MainWindow(QWidget* parent) :
     ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
 //    const int textIndex = ui_->comboBox->findData("C:/", Qt::DisplayRole);
 //    ui_->comboBox->setCurrentIndex(textIndex);
-//    ui_->comboBox->setCurrentIndex(0);
+    ui_->comboBox->setCurrentIndex(0);
 
     // init statusbar
     QProgressBar* progBar = new QProgressBar;
@@ -60,13 +67,6 @@ MainWindow::MainWindow(QWidget* parent) :
     statGetter_->SetProgBar(progBar);
     statGetter_->SetLabel(label);
     statGetter_->SetView(ui_->tableWidget);
-
-    // set connections
-    connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setTreeRootIndex(int)));
-
-    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
-            SLOT(processStatRequest(QModelIndex)));
 }
 
 MainWindow::~MainWindow()
@@ -78,18 +78,19 @@ void MainWindow::setTreeRootIndex(int index)
 {
     const int row = index;
     const int col = 0;
-    const QModelIndex modelIndex = fsComboModel_->index(row, col);
+    const QModelIndex modelIndex = ui_->comboBox->model()->index(row, col);
     const QString selectedPath =
             fsComboModel_->fileInfo(modelIndex).absoluteFilePath();
 
-    if (ui_->treeView->model() == nullptr)
-    {
+//    if (ui_->treeView->model() == nullptr)
+//    {
 //        fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-//        fsTreeModel_->setRootPath(selectedPath);
+        fsTreeModel_ = new SimpleFSModel(this);
+        fsTreeModel_->setRootPath(selectedPath);
         ui_->treeView->setModel(fsTreeModel_);
 
     //    treeBuilder_->BuildDirTree(path);
-    }
+//    }
 
 //    QModelIndex fsIndex = fsTreeModel_->index(selectedPath);
 
