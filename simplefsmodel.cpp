@@ -9,7 +9,7 @@
 
 SimpleFSModel::SimpleFSModel(QObject* parent) :
     QAbstractItemModel(parent),
-    _metaProvider(new QFileIconProvider())
+    metaProvider_(new QFileIconProvider())
 {
     fetchRootDirectory();
 }
@@ -47,21 +47,22 @@ struct SimpleFSModel::NodeInfo
     bool mapped;
 };
 
-QModelIndex SimpleFSModel::index(int row, int column, const QModelIndex &parent) const
+QModelIndex SimpleFSModel::index(int row, int column,
+     const QModelIndex& parent) const
 {
     if (!hasIndex(row, column, parent)) {
         return QModelIndex();
     }
 
     if (!parent.isValid()) { // запрашивают индексы корневых узлов
-        return createIndex(row, column, const_cast<NodeInfo*>(&_nodes[row]));
+        return createIndex(row, column, const_cast<NodeInfo*>(&nodes_[row]));
     }
 
     NodeInfo* parentInfo = static_cast<NodeInfo*>(parent.internalPointer());
     return createIndex(row, column, &parentInfo->children[row]);
 }
 
-QModelIndex SimpleFSModel::parent(const QModelIndex &child) const
+QModelIndex SimpleFSModel::parent(const QModelIndex& child) const
 {
     if (!child.isValid()) {
         return QModelIndex();
@@ -77,28 +78,28 @@ QModelIndex SimpleFSModel::parent(const QModelIndex &child) const
     }
 }
 
-int SimpleFSModel::findRow(const NodeInfo *nodeInfo) const
+int SimpleFSModel::findRow(const NodeInfo* nodeInfo) const
 {
-    const NodeInfoList& parentInfoChildren = nodeInfo->parent != 0 ? nodeInfo->parent->children: _nodes;
+    const NodeInfoList& parentInfoChildren = nodeInfo->parent != 0 ? nodeInfo->parent->children: nodes_;
     NodeInfoList::const_iterator position = qFind(parentInfoChildren, *nodeInfo);
     return std::distance(parentInfoChildren.begin(), position);
 }
 
-int SimpleFSModel::rowCount(const QModelIndex &parent) const
+int SimpleFSModel::rowCount(const QModelIndex& parent) const
 {
     if (!parent.isValid()) {
-        return _nodes.size();
+        return nodes_.size();
     }
     const NodeInfo* parentInfo = static_cast<const NodeInfo*>(parent.internalPointer());
     return parentInfo->children.size();
 }
 
-int SimpleFSModel::columnCount(const QModelIndex &) const
+int SimpleFSModel::columnCount(const QModelIndex& ) const
 {
     return ColumnCount;
 }
 
-QVariant SimpleFSModel::data(const QModelIndex &index, int role) const
+QVariant SimpleFSModel::data(const QModelIndex& index, int role) const
 {
     if (!index.isValid()) {
         return QVariant();
@@ -178,7 +179,7 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
 void SimpleFSModel::fetchRootDirectory()
 {
     const QFileInfoList drives = QDir::drives();
-    qCopy(drives.begin(), drives.end(), std::back_inserter(_nodes));
+    qCopy(drives.begin(), drives.end(), std::back_inserter(nodes_));
 }
 
 

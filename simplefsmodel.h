@@ -15,18 +15,18 @@ public:
     SimpleFSModel(QObject* parent);
     ~SimpleFSModel();
 
-    QModelIndex index(int row, int column, const QModelIndex &parent) const;
-    QModelIndex parent(const QModelIndex &child) const;
+    QModelIndex index(int row, int column, const QModelIndex& parent) const;
+    QModelIndex parent(const QModelIndex& child) const;
 
-    int rowCount(const QModelIndex &parent) const;
-    int columnCount(const QModelIndex &parent) const;
+    int rowCount(const QModelIndex& parent) const;
+    int columnCount(const QModelIndex& parent) const;
 
-    QVariant data(const QModelIndex &index, int role) const;
+    QVariant data(const QModelIndex& index, int role) const;
 
-    bool canFetchMore(const QModelIndex &parent) const;
-    void fetchMore(const QModelIndex &parent);
+    bool canFetchMore(const QModelIndex& parent) const;
+    void fetchMore(const QModelIndex& parent);
 
-    bool hasChildren(const QModelIndex &parent) const;
+    bool hasChildren(const QModelIndex& parent) const;
 
 private:
     enum Columns
@@ -41,8 +41,8 @@ private:
 
     struct NodeInfo;
     typedef QVector<NodeInfo> NodeInfoList;
-    NodeInfoList _nodes;
-    QScopedPointer<QFileIconProvider> _metaProvider;
+    NodeInfoList nodes_;
+    QScopedPointer<QFileIconProvider> metaProvider_;
 
     void fetchRootDirectory();
     int findRow(const NodeInfo* nodeInfo) const;

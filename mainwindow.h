@@ -8,6 +8,7 @@
 #include <QString>
 
 #include "dirtreebuilder.h"
+#include <simplefsmodel.h>
 #include "statgetter.h"
 
 namespace Ui {
@@ -32,7 +33,8 @@ private:
 private:
     Ui::MainWindow* ui_;
     QFileSystemModel* fsComboModel_;
-    QFileSystemModel* fsTreeModel_;
+    SimpleFSModel* fsTreeModel_;
+//    QFileSystemModel* fsTreeModel_;
     StatGetter* statGetter_;
     DirTreeBuilder* treeBuilder_;
 };

@@ -13,7 +13,7 @@ MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
     fsComboModel_(new QFileSystemModel(this)),
-    fsTreeModel_(new QFileSystemModel(this)),
+    fsTreeModel_(new SimpleFSModel(this)),
     statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this))
 {
@@ -84,24 +84,23 @@ void MainWindow::setTreeRootIndex(int index)
 
     if (ui_->treeView->model() == nullptr)
     {
-        fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-        fsTreeModel_->setRootPath(selectedPath);
+//        fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+//        fsTreeModel_->setRootPath(selectedPath);
         ui_->treeView->setModel(fsTreeModel_);
 
     //    treeBuilder_->BuildDirTree(path);
     }
 
-    QModelIndex fsIndex = fsTreeModel_->index(selectedPath);
+//    QModelIndex fsIndex = fsTreeModel_->index(selectedPath);
 
-    ui_->treeView->setRootIndex(fsIndex);
-    ui_->treeView->setCurrentIndex(fsIndex);
+//    ui_->treeView->setRootIndex(fsIndex);
+//    ui_->treeView->setCurrentIndex(fsIndex);
 }
 
 void MainWindow::processStatRequest(const QModelIndex& index)
 {
-//    qDebug() << "processStatRequest";
-    const QString selectedPath = fsTreeModel_->fileInfo(index).absoluteFilePath();
-    statGetter_->GetStatsForPath(selectedPath);
+//    const QString selectedPath = fsTreeModel_->fileInfo(index).absoluteFilePath();
+//    statGetter_->GetStatsForPath(selectedPath);
 }
 
 void MainWindow::SetPositionCenter()
