@@ -16,18 +16,10 @@ MainWindow::MainWindow(QWidget* parent) :
     fsTreeModel_(new QFileSystemModel(this)),
     statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this))
-
 {
     ui_->setupUi(this);
 
     SetPositionCenter();
-
-    // set connections
-    connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
-            SLOT(setTreeRootIndex(int)));
-
-//    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
-//            SLOT(processStatRequest(QModelIndex)));
 
     // init combobox
      const QString selectedPath("");
@@ -40,6 +32,9 @@ MainWindow::MainWindow(QWidget* parent) :
     ui_->comboBox->setModel(fsComboModel_);
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
+//    const int textIndex = ui_->comboBox->findData("C:/", Qt::DisplayRole);
+//    ui_->comboBox->setCurrentIndex(textIndex);
+//    ui_->comboBox->setCurrentIndex(0);
 
     // init statusbar
     QProgressBar* progBar = new QProgressBar;
@@ -66,6 +61,12 @@ MainWindow::MainWindow(QWidget* parent) :
     statGetter_->SetLabel(label);
     statGetter_->SetView(ui_->tableWidget);
 
+    // set connections
+    connect(ui_->comboBox, SIGNAL(currentIndexChanged(int)), this,
+            SLOT(setTreeRootIndex(int)));
+
+    connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
+            SLOT(processStatRequest(QModelIndex)));
 }
 
 MainWindow::~MainWindow()
@@ -75,7 +76,6 @@ MainWindow::~MainWindow()
 
 void MainWindow::setTreeRootIndex(int index)
 {
-//    const QString itemName = ui_->comboBox->itemText(index);
     const int row = index;
     const int col = 0;
     const QModelIndex modelIndex = fsComboModel_->index(row, col);
