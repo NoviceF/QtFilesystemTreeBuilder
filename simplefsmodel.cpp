@@ -154,7 +154,7 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
     QDir dir = QDir(fileInfo.absoluteFilePath());
     QFileInfoList children = dir.entryInfoList(QStringList(),
        QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
-
+    // BUG здесь я сделал какой-то баг, надо чинить
     beginInsertRows(parent, 0, children.size() - 1);
     parentInfo->children.reserve(children.size());
     for (const QFileInfo& entry: children) {
