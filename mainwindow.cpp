@@ -35,8 +35,8 @@ MainWindow::MainWindow(QWidget* parent) :
     {
         const QString absolutePath = diskInfo.absoluteFilePath();
 
-        ui_->comboBox->addItem(absolutePath.left(absolutePath.size() - 1),
-                               absolutePath);
+        ui_->comboBox->addItem(this->style()->standardIcon(QStyle::SP_DriveHDIcon),
+           absolutePath.left(absolutePath.size() - 1), absolutePath);
     }
 
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
