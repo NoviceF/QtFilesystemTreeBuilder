@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include <QFileIconProvider>
 #include <QFileSystemModel>
 #include <QTreeView>
 #include <QListView>
@@ -36,6 +37,7 @@ private:
     SimpleFSModel* fsTreeModel_;
     StatGetter* statGetter_;
     DirTreeBuilder* treeBuilder_;
+    QFileIconProvider* iconProvider_;
     const QVector<QFileInfo> disks_;
 };
 

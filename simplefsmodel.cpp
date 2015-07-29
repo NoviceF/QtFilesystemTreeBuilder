@@ -49,74 +49,132 @@ struct SimpleFSModel::NodeInfo
 QModelIndex SimpleFSModel::index(int row, int column,
      const QModelIndex& parent) const
 {
-    if (!hasIndex(row, column, parent)) {
+    if (!hasIndex(row, column, parent))
+    {
         return QModelIndex();
     }
 
-    if (!parent.isValid()) { // запрашивают индексы корневых узлов
+    if (!parent.isValid()) // запрашивают индексы корневых узлов
+    {
+        Q_ASSERT(nodes_.size() > row);
         return createIndex(row, column, const_cast<NodeInfo*>(&nodes_[row]));
     }
 
     NodeInfo* parentInfo = static_cast<NodeInfo*>(parent.internalPointer());
+    Q_ASSERT(parentInfo != 0);
+    Q_ASSERT(parentInfo->mapped);
+    Q_ASSERT(parentInfo->children.size() > row);
     return createIndex(row, column, &parentInfo->children[row]);
 }
 
 QModelIndex SimpleFSModel::parent(const QModelIndex& child) const
 {
-    if (!child.isValid()) {
+    if (!child.isValid())
+    {
         return QModelIndex();
     }
 
     NodeInfo* childInfo = static_cast<NodeInfo*>(child.internalPointer());
+    Q_ASSERT(childInfo != 0);
     NodeInfo* parentInfo = childInfo->parent;
-    if (parentInfo != 0) { // parent запрашивается не у корневого элемента
+
+    if (parentInfo != 0)
         return createIndex(findRow(parentInfo), RamificationColumn, parentInfo);
-    }
-    else {
+    else
         return QModelIndex();
-    }
 }
 
 int SimpleFSModel::findRow(const NodeInfo* nodeInfo) const
 {
-    const NodeInfoList& parentInfoChildren = nodeInfo->parent != 0 ? nodeInfo->parent->children: nodes_;
+    Q_ASSERT(nodeInfo != 0);
+    const NodeInfoList& parentInfoChildren = nodeInfo->parent != 0 ?
+                nodeInfo->parent->children :
+                nodes_;
     NodeInfoList::const_iterator position = qFind(parentInfoChildren, *nodeInfo);
+    Q_ASSERT(position != parentInfoChildren.end());
     return std::distance(parentInfoChildren.begin(), position);
 }
 
 int SimpleFSModel::rowCount(const QModelIndex& parent) const
 {
-    if (!parent.isValid()) {
+    if (!parent.isValid())
         return nodes_.size();
-    }
-    const NodeInfo* parentInfo = static_cast<const NodeInfo*>(parent.internalPointer());
+
+    const NodeInfo* parentInfo =
+            static_cast<const NodeInfo*>(parent.internalPointer());
+
+    Q_ASSERT(parentInfo != 0);
+
     return parentInfo->children.size();
 }
 
-int SimpleFSModel::columnCount(const QModelIndex& ) const
+bool SimpleFSModel::hasChildren(const QModelIndex &parent) const
+{
+    if (parent.isValid())
+    {
+        const NodeInfo* parentInfo =
+                static_cast<const NodeInfo*>(parent.internalPointer());
+        Q_ASSERT(parentInfo != 0);
+
+        if (!parentInfo->mapped)
+            return QDir(parentInfo->fileInfo.absoluteFilePath()).count() > 0;
+    }
+
+    return QAbstractItemModel::hasChildren(parent);
+}
+
+int SimpleFSModel::columnCount(const QModelIndex&) const
 {
     return ColumnCount;
 }
 
 QVariant SimpleFSModel::data(const QModelIndex& index, int role) const
 {
-    if (!index.isValid()) {
+    if (!index.isValid())
         return QVariant();
-    }
 
     const NodeInfo* nodeInfo = static_cast<NodeInfo*>(index.internalPointer());
     const QFileInfo& fileInfo = nodeInfo->fileInfo;
+    Q_ASSERT(nodeInfo != 0);
 
-    switch (index.column()) {
+    switch (index.column())
+    {
     case NameColumn:
         return nameData(fileInfo, role);
     default:
         break;
     }
+
     return QVariant();
 }
 
-QVariant SimpleFSModel::headerData(int section, Qt::Orientation orientation, int role) const
+QVariant SimpleFSModel::nameData(const QFileInfo &fileInfo, int role) const
+{
+
+    switch (role)
+    {
+        case Qt::DisplayRole:
+        {
+            if (fileInfo.isRoot())
+                return fileInfo.absoluteFilePath();
+            else
+                return fileInfo.fileName();
+        }
+        case Qt::DecorationRole:
+        {
+            return metaProvider_->icon(fileInfo);
+        }
+        default:
+        {
+            return QVariant();
+        }
+    }
+
+    Q_UNREACHABLE();
+}
+
+QVariant SimpleFSModel::headerData(int section, Qt::Orientation orientation,
+       int role) const
 {
     const QStringList headers = {"Name"};
     if (orientation == Qt::Horizontal && role ==
@@ -128,33 +186,15 @@ QVariant SimpleFSModel::headerData(int section, Qt::Orientation orientation, int
     return QVariant();
 }
 
-QVariant SimpleFSModel::nameData(const QFileInfo &fileInfo, int role) const
-{
-    switch (role) {
-    case Qt::DisplayRole:
-        if (fileInfo.isRoot()) {
-            return fileInfo.absoluteFilePath();
-        }
-        else if (fileInfo.isDir()){
-            return fileInfo.fileName();
-        }
-        else {
-            return fileInfo.fileName();
-        }
-    case Qt::EditRole:
-        return fileInfo.fileName();
-    default:
-        return QVariant();
-    }
-    Q_UNREACHABLE();
-}
-
 bool SimpleFSModel::canFetchMore(const QModelIndex &parent) const
 {
-    if (!parent.isValid()) {
+    if (!parent.isValid())
         return false;
-    }
-    const NodeInfo* parentInfo = static_cast<const NodeInfo*>(parent.internalPointer());
+
+    const NodeInfo* parentInfo =
+            static_cast<const NodeInfo*>(parent.internalPointer());
+    Q_ASSERT(parentInfo != 0);
+
     return !parentInfo->mapped;
 }
 
@@ -194,15 +234,3 @@ void SimpleFSModel::setRootPath(const QString& path)
     qCopy(drives.begin(), drives.end(), std::back_inserter(nodes_));
 }
 
-
-bool SimpleFSModel::hasChildren(const QModelIndex &parent) const
-{
-    if (parent.isValid()) {
-        const NodeInfo* parentInfo = static_cast<const NodeInfo*>(parent.internalPointer());
-        Q_ASSERT(parentInfo != 0);
-        if (!parentInfo->mapped) {
-            return true;//QDir(parentInfo->fileInfo.absoluteFilePath()).count() > 0; -- точное определение того, что директория не пуста
-        }
-    }
-    return QAbstractItemModel::hasChildren(parent);
-}

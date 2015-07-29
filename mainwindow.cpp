@@ -17,6 +17,7 @@ MainWindow::MainWindow(QWidget* parent) :
     fsTreeModel_(nullptr),
     statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this)),
+    iconProvider_(new QFileIconProvider()),
     disks_(FillDisks())
 {
     ui_->setupUi(this);
@@ -34,9 +35,13 @@ MainWindow::MainWindow(QWidget* parent) :
     for (const QFileInfo& diskInfo : disks_)
     {
         const QString absolutePath = diskInfo.absoluteFilePath();
+        // for linux root
+        const QString diskName = absolutePath.size() > 1 ?
+                    absolutePath.left(absolutePath.size() - 1) :
+                    absolutePath;
 
-        ui_->comboBox->addItem(this->style()->standardIcon(QStyle::SP_DriveHDIcon),
-           absolutePath.left(absolutePath.size() - 1), absolutePath);
+        ui_->comboBox->addItem(iconProvider_->icon(diskInfo), diskName,
+            absolutePath);
     }
 
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
