@@ -116,6 +116,18 @@ QVariant SimpleFSModel::data(const QModelIndex& index, int role) const
     return QVariant();
 }
 
+QVariant SimpleFSModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    const QStringList headers = {"Name"};
+    if (orientation == Qt::Horizontal && role ==
+            Qt::DisplayRole && section < headers.size())
+    {
+        return headers[section];
+    }
+
+    return QVariant();
+}
+
 QVariant SimpleFSModel::nameData(const QFileInfo &fileInfo, int role) const
 {
     switch (role) {
@@ -127,7 +139,7 @@ QVariant SimpleFSModel::nameData(const QFileInfo &fileInfo, int role) const
             return fileInfo.fileName();
         }
         else {
-            return fileInfo.completeBaseName();
+            return fileInfo.fileName();
         }
     case Qt::EditRole:
         return fileInfo.fileName();
@@ -146,15 +158,22 @@ bool SimpleFSModel::canFetchMore(const QModelIndex &parent) const
     return !parentInfo->mapped;
 }
 
-
 void SimpleFSModel::fetchMore(const QModelIndex &parent)
 {
+    Q_ASSERT(parent.isValid());
     NodeInfo* parentInfo = static_cast<NodeInfo*>(parent.internalPointer());
+    Q_ASSERT(parentInfo != 0);
+    Q_ASSERT(!parentInfo->mapped);
+
     const QFileInfo& fileInfo = parentInfo->fileInfo;
+    Q_ASSERT(fileInfo.isDir());
+
     QDir dir = QDir(fileInfo.absoluteFilePath());
-    QFileInfoList children = dir.entryInfoList(QStringList(),
-       QDir::Dirs | QDir::NoDotAndDotDot, QDir::Name);
-    // BUG здесь я сделал какой-то баг, надо чинить
+//    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::Dirs |
+//       QDir::NoDotAndDotDot, QDir::Name);
+    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::AllEntries |
+       QDir::NoDotAndDotDot, QDir::Name);
+
     beginInsertRows(parent, 0, children.size() - 1);
     parentInfo->children.reserve(children.size());
     for (const QFileInfo& entry: children) {
