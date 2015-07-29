@@ -36,12 +36,14 @@ MainWindow::MainWindow(QWidget* parent) :
 //    fsComboModel_->setFilter(QDir::Drives);
     fsComboModel_->setRootPath(selectedPath);
 
+    ui_->comboBox->blockSignals(true);
     ui_->comboBox->setModel(fsComboModel_);
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
 //    const int textIndex = ui_->comboBox->findData("C:/", Qt::DisplayRole);
 //    ui_->comboBox->setCurrentIndex(textIndex);
-    ui_->comboBox->setCurrentIndex(0);
+    ui_->comboBox->blockSignals(false);
+//    ui_->comboBox->setCurrentIndex(0);
 
     // init statusbar
     QProgressBar* progBar = new QProgressBar;
@@ -78,24 +80,18 @@ void MainWindow::setTreeRootIndex(int index)
 {
     const int row = index;
     const int col = 0;
-    const QModelIndex modelIndex = ui_->comboBox->model()->index(row, col);
+    const QModelIndex rootIndex = fsComboModel_->index(fsComboModel_->rootPath());
+    const QModelIndex modelIndex = rootIndex.child(row, col);
     const QString selectedPath =
             fsComboModel_->fileInfo(modelIndex).absoluteFilePath();
 
-//    if (ui_->treeView->model() == nullptr)
-//    {
-//        fsTreeModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
-        fsTreeModel_ = new SimpleFSModel(this);
-        fsTreeModel_->setRootPath(selectedPath);
-        ui_->treeView->setModel(fsTreeModel_);
+    SimpleFSModel* oldModel = fsTreeModel_;
 
-    //    treeBuilder_->BuildDirTree(path);
-//    }
+    fsTreeModel_ = new SimpleFSModel(this);
+    fsTreeModel_->setRootPath(selectedPath);
+    ui_->treeView->setModel(fsTreeModel_);
 
-//    QModelIndex fsIndex = fsTreeModel_->index(selectedPath);
-
-//    ui_->treeView->setRootIndex(fsIndex);
-//    ui_->treeView->setCurrentIndex(fsIndex);
+    delete oldModel;
 }
 
 void MainWindow::processStatRequest(const QModelIndex& index)

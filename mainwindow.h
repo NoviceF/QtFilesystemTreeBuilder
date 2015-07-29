@@ -1,6 +1,8 @@
 ﻿#ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+#include <memory>
+
 #include <QMainWindow>
 #include <QFileSystemModel>
 #include <QTreeView>
@@ -34,7 +36,6 @@ private:
     Ui::MainWindow* ui_;
     QFileSystemModel* fsComboModel_;
     SimpleFSModel* fsTreeModel_;
-//    QFileSystemModel* fsTreeModel_;
     StatGetter* statGetter_;
     DirTreeBuilder* treeBuilder_;
 };
