@@ -1,5 +1,5 @@
 ﻿#include <cassert>
-#include <unistd.h>
+#include <memory>
 
 #include <QDebug>
 #include <QDesktopWidget>
@@ -85,13 +85,12 @@ void MainWindow::setTreeRootIndex(int index)
     const QString selectedPath =
             fsComboModel_->fileInfo(modelIndex).absoluteFilePath();
 
-    SimpleFSModel* oldModel = fsTreeModel_;
+    // авто вызов delete
+    std::shared_ptr<SimpleFSModel> oldModel(fsTreeModel_);
 
     fsTreeModel_ = new SimpleFSModel(this);
     fsTreeModel_->setRootPath(selectedPath);
     ui_->treeView->setModel(fsTreeModel_);
-
-    delete oldModel;
 }
 
 void MainWindow::processStatRequest(const QModelIndex& index)
