@@ -92,8 +92,8 @@ void MainWindow::setTreeRootIndex(int)
 
 void MainWindow::processStatRequest(const QModelIndex& index)
 {
-//    const QString selectedPath = fsTreeModel_->fileInfo(index).absoluteFilePath();
-//    statGetter_->GetStatsForPath(selectedPath);
+    const QString selectedPath = fsTreeModel_->fileInfo(index).absoluteFilePath();
+    statGetter_->GetStatsForPath(selectedPath);
 }
 
 void MainWindow::SetPositionCenter()

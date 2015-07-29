@@ -32,6 +32,8 @@ public:
 
     bool hasChildren(const QModelIndex& parent) const;
 
+    QFileInfo fileInfo(const QModelIndex& index) const;
+
 private:
     enum Columns
     {

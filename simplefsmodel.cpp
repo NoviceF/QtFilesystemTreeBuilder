@@ -123,6 +123,11 @@ bool SimpleFSModel::hasChildren(const QModelIndex &parent) const
     return QAbstractItemModel::hasChildren(parent);
 }
 
+QFileInfo SimpleFSModel::fileInfo(const QModelIndex& index) const
+{
+    return static_cast<NodeInfo*>(index.internalPointer())->fileInfo;
+}
+
 int SimpleFSModel::columnCount(const QModelIndex&) const
 {
     return ColumnCount;
@@ -209,10 +214,11 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
     Q_ASSERT(fileInfo.isDir());
 
     QDir dir = QDir(fileInfo.absoluteFilePath());
-//    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::Dirs |
-//       QDir::NoDotAndDotDot, QDir::Name);
-    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::AllEntries |
+    // BUG: починить на windows
+    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::Dirs |
        QDir::NoDotAndDotDot, QDir::Name);
+//    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::AllEntries |
+//       QDir::NoDotAndDotDot, QDir::Name);
 
     beginInsertRows(parent, 0, children.size() - 1);
     parentInfo->children.reserve(children.size());

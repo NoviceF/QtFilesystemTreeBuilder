@@ -1,12 +1,11 @@
 ﻿#ifndef DIRTREEBUILDER_H
 #define DIRTREEBUILDER_H
 
-#include <QFileSystemModel>
 #include <QLabel>
 #include <QObject>
 #include <QStringList>
 
-
+#include <simplefsmodel.h>
 #include <controller.h>
 #include <progressworker.h>
 
@@ -16,20 +15,13 @@ class TreeBuilderThread : public IProgressWorker
     Q_OBJECT
 public:
     explicit TreeBuilderThread(const QString& rootPath, QProgressBar* progBar,
-        QLabel* label, QObject* parent = 0);
-
-private:
-    QStringList GetDirList();
-
-private slots:
-    void dirWasLoaded(const QString&);
+        SimpleFSModel& fsModel, QLabel* label, QObject* parent = 0);
 
 public slots:
     virtual void onStart();
-    virtual void onAbort();
 
 private:
-    QFileSystemModel fsModel_;
+    SimpleFSModel& fsModel_;
     QString root_;
     bool abort_;
 };
