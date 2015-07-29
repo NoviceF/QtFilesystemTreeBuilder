@@ -24,18 +24,19 @@ public:
     ~MainWindow();
 
 private slots:
-    void setTreeRootIndex(int index);
+    void setTreeRootIndex(int);
     void processStatRequest(const QModelIndex& index);
 
 private:
     void SetPositionCenter();
+    static QVector<QFileInfo> FillDisks();
 
 private:
     Ui::MainWindow* ui_;
-    QFileSystemModel* fsComboModel_;
     SimpleFSModel* fsTreeModel_;
     StatGetter* statGetter_;
     DirTreeBuilder* treeBuilder_;
+    const QVector<QFileInfo> disks_;
 };
 
 #endif // MAINWINDOW_H

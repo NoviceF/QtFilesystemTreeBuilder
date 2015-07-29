@@ -1,5 +1,7 @@
-﻿#include <cassert>
+﻿#include <algorithm>
+#include <cassert>
 #include <memory>
+
 
 #include <QDebug>
 #include <QDesktopWidget>
@@ -12,10 +14,10 @@
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
-    fsComboModel_(new QFileSystemModel(this)),
     fsTreeModel_(nullptr),
     statGetter_(new StatGetter(this)),
-    treeBuilder_(new DirTreeBuilder(this))
+    treeBuilder_(new DirTreeBuilder(this)),
+    disks_(FillDisks())
 {
     ui_->setupUi(this);
 
@@ -29,20 +31,15 @@ MainWindow::MainWindow(QWidget* parent) :
             SLOT(processStatRequest(QModelIndex)));
 
     // init combobox
-//     const QString selectedPath("");
-    const QString selectedPath("/home/novice/proj/cpp/dirtest");
-    fsComboModel_->setFilter(QDir::Dirs | QDir::NoDotAndDotDot);
+    for (const QFileInfo& diskInfo : disks_)
+    {
+        const QString absolutePath = diskInfo.absoluteFilePath();
 
-//    fsComboModel_->setFilter(QDir::Drives);
-    fsComboModel_->setRootPath(selectedPath);
+        ui_->comboBox->addItem(absolutePath.left(absolutePath.size() - 1),
+                               absolutePath);
+    }
 
-    ui_->comboBox->blockSignals(true);
-    ui_->comboBox->setModel(fsComboModel_);
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-    ui_->comboBox->setRootModelIndex(fsComboModel_->index(fsComboModel_->rootPath()));
-//    const int textIndex = ui_->comboBox->findData("C:/", Qt::DisplayRole);
-//    ui_->comboBox->setCurrentIndex(textIndex);
-    ui_->comboBox->blockSignals(false);
     ui_->comboBox->setCurrentIndex(0);
 
     // init statusbar
@@ -76,14 +73,9 @@ MainWindow::~MainWindow()
     delete ui_;
 }
 
-void MainWindow::setTreeRootIndex(int index)
+void MainWindow::setTreeRootIndex(int)
 {
-    const int row = index;
-    const int col = 0;
-    const QModelIndex rootIndex = fsComboModel_->index(fsComboModel_->rootPath());
-    const QModelIndex modelIndex = rootIndex.child(row, col);
-    const QString selectedPath =
-            fsComboModel_->fileInfo(modelIndex).absoluteFilePath();
+    const QString selectedPath = ui_->comboBox->currentData().toString();
 
     // авто вызов delete
     std::shared_ptr<SimpleFSModel> oldModel(fsTreeModel_);
@@ -115,5 +107,14 @@ void MainWindow::SetPositionCenter()
     const int heightPos = (screenHeight/2) - (mainHeight/2);
 
     this->move(widthPos,heightPos);
+}
+
+/*static*/ QVector<QFileInfo> MainWindow::FillDisks()
+{
+    QVector<QFileInfo> disks;
+    const QFileInfoList drives = QDir::drives();
+    qCopy(drives.begin(), drives.end(), std::back_inserter(disks));
+
+    return disks;
 }
 
