@@ -43,7 +43,7 @@ MainWindow::MainWindow(QWidget* parent) :
 //    const int textIndex = ui_->comboBox->findData("C:/", Qt::DisplayRole);
 //    ui_->comboBox->setCurrentIndex(textIndex);
     ui_->comboBox->blockSignals(false);
-//    ui_->comboBox->setCurrentIndex(0);
+    ui_->comboBox->setCurrentIndex(0);
 
     // init statusbar
     QProgressBar* progBar = new QProgressBar;
