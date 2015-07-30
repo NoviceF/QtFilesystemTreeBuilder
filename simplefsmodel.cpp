@@ -214,20 +214,25 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
     Q_ASSERT(fileInfo.isDir());
 
     QDir dir = QDir(fileInfo.absoluteFilePath());
-    // BUG: починить на windows
+
     QFileInfoList children = dir.entryInfoList(QStringList(), QDir::Dirs |
        QDir::NoDotAndDotDot, QDir::Name);
-//    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::AllEntries |
-//       QDir::NoDotAndDotDot, QDir::Name);
+
+    parentInfo->mapped = true;
+
+    if (children.isEmpty())
+        return;
 
     beginInsertRows(parent, 0, children.size() - 1);
     parentInfo->children.reserve(children.size());
-    for (const QFileInfo& entry: children) {
+
+    for (const QFileInfo& entry: children)
+    {
         NodeInfo nodeInfo(entry, parentInfo);
         nodeInfo.mapped = !entry.isDir();
         parentInfo->children.push_back(std::move(nodeInfo));
     }
-    parentInfo->mapped = true;
+
     endInsertRows();
 }
 
