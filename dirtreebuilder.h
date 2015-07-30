@@ -14,7 +14,7 @@ class FsModelThread : public IProgressWorker
 {
     Q_OBJECT
 public:
-    explicit TreeBuilderThread(const QString& rootPath, SimpleFSModel& fsModel,
+    explicit FsModelThread(const QString& rootPath, SimpleFSModel& fsModel,
             QProgressBar* progBar, QLabel* label, QObject* parent = 0);
 
 public slots:

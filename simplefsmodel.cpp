@@ -245,3 +245,19 @@ void SimpleFSModel::setRootPath(const QString& path)
     qCopy(drives.begin(), drives.end(), std::back_inserter(nodes_));
 }
 
+///
+/// \brief ProxyFSModel
+///
+
+ProxyFSModel::ProxyFSModel(QObject* parent) :
+    QAbstractProxyModel(parent),
+    fsModel_(nullptr)
+
+{
+}
+
+ProxyFSModel::setSourceModel(QAbstractItemModel* model)
+{
+    if (fsModel_)
+        delete fsModel_;
+}

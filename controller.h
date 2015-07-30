@@ -14,6 +14,7 @@ class Controller : public QObject
 public:
     bool IsRunning() { return running_; }
     void RunThread(IProgressWorker* worker);
+    void RemoveThread();
     void RiseRunningThreadWarningMsg();
     void SetProgBar(QProgressBar* progBar);
     QProgressBar* GetProgBar();
@@ -27,7 +28,6 @@ protected:
     ~Controller() = default;
 
 private:
-    void RemoveThread();
     void RiseErrorMsg(const QString& msg);
 
 signals:

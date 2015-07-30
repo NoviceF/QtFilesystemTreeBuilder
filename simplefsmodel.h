@@ -3,6 +3,7 @@
 
 
 #include <QAbstractItemModel>
+#include <QAbstractProxyModel>
 #include <QVector>
 
 class QFileIconProvider;
@@ -49,6 +50,21 @@ private:
 
     int findRow(const NodeInfo* nodeInfo) const;
     QVariant nameData(const QFileInfo& fileInfo, int role) const;
+};
+
+class ProxyFSModel : public QAbstractProxyModel
+{
+    Q_OBJECT
+
+public:
+    explicit ProxyFSModel(QObject* parent);
+    ~ProxyFSModel();
+
+    setSourceModel(QAbstractItemModel* model) override;
+
+
+private:
+    SimpleFSModel* fsModel_;
 };
 
 #endif // SIMPLEFSMODEL_H
