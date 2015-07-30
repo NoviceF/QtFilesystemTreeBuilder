@@ -256,8 +256,43 @@ ProxyFSModel::ProxyFSModel(QObject* parent) :
 {
 }
 
-ProxyFSModel::setSourceModel(QAbstractItemModel* model)
+ProxyFSModel::~ProxyFSModel() /*override*/
 {
-    if (fsModel_)
-        delete fsModel_;
+}
+
+void ProxyFSModel::SetSourceModel(SimpleFSModel* model)
+{
+    QAbstractProxyModel::setSourceModel(model);
+
+    fsModel_.reset(model);
+}
+
+QModelIndex ProxyFSModel::mapToSource(const QModelIndex& proxyIndex) const
+{
+
+}
+
+QModelIndex ProxyFSModel::mapFromSource(const QModelIndex& sourceIndex) const
+{
+
+}
+
+QModelIndex ProxyFSModel::index(int row, int column, const QModelIndex& parent) const
+{
+
+}
+
+QModelIndex ProxyFSModel::parent(const QModelIndex& child) const
+{
+
+}
+
+int ProxyFSModel::rowCount(const QModelIndex& parent) const
+{
+
+}
+
+int ProxyFSModel::columnCount(const QModelIndex& parent) const
+{
+
 }

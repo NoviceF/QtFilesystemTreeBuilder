@@ -4,6 +4,7 @@
 
 #include <QAbstractItemModel>
 #include <QAbstractProxyModel>
+#include <QScopedPointer>
 #include <QVector>
 
 class QFileIconProvider;
@@ -13,7 +14,7 @@ class SimpleFSModel : public QAbstractItemModel
 {
     Q_OBJECT
 public:
-    SimpleFSModel(QObject* parent);
+    explicit SimpleFSModel(QObject* parent = nullptr);
     ~SimpleFSModel();
 
     void setRootPath(const QString& path);
@@ -58,13 +59,22 @@ class ProxyFSModel : public QAbstractProxyModel
 
 public:
     explicit ProxyFSModel(QObject* parent);
-    ~ProxyFSModel();
+    ~ProxyFSModel() override;
 
-    setSourceModel(QAbstractItemModel* model) override;
+    void SetSourceModel(SimpleFSModel* model);
 
+    QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
+    QModelIndex mapFromSource(const QModelIndex& sourceIndex) const override;
+
+    QModelIndex index(int row, int column,
+          const QModelIndex &parent = QModelIndex()) const override;
+    QModelIndex parent(const QModelIndex &child) const override;
+
+    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
+    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
 private:
-    SimpleFSModel* fsModel_;
+    QScopedPointer <SimpleFSModel> fsModel_;
 };
 
 #endif // SIMPLEFSMODEL_H
