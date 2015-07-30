@@ -10,12 +10,12 @@
 #include <progressworker.h>
 
 
-class TreeBuilderThread : public IProgressWorker
+class FsModelThread : public IProgressWorker
 {
     Q_OBJECT
 public:
-    explicit TreeBuilderThread(const QString& rootPath, QProgressBar* progBar,
-        SimpleFSModel& fsModel, QLabel* label, QObject* parent = 0);
+    explicit TreeBuilderThread(const QString& rootPath, SimpleFSModel& fsModel,
+            QProgressBar* progBar, QLabel* label, QObject* parent = 0);
 
 public slots:
     virtual void onStart();

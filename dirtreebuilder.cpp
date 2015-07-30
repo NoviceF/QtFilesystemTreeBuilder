@@ -12,8 +12,8 @@
 #include "dirtreebuilder.h"
 
 
-TreeBuilderThread::TreeBuilderThread(const QString& rootPath,
-        QProgressBar* progBar, SimpleFSModel& fsModel, QLabel* label, QObject* parent) :
+TreeBuilderThread::TreeBuilderThread(const QString& rootPath, SimpleFSModel& fsModel,
+        QProgressBar* progBar, QLabel* label, QObject* parent) :
     IProgressWorker(progBar, label, parent),
     fsModel_(fsModel),
     root_(rootPath),
@@ -46,14 +46,18 @@ DirTreeBuilder::DirTreeBuilder(QObject* parent) :
 void DirTreeBuilder::BuildDirTree(const QString& path)
 {
     if (IsRunning())
-    {
-        RiseRunningThreadWarningMsg();
-        return;
-    }
+        RemoveThread();
 
-//    TreeBuilderThread* builderThread = new TreeBuilderThread(path, progBar_, label_);
-
-//    RunThread(builderThread);
+    SimpleFSModel* fsSimpleModel = new SimpleFSModel();
+    // fsProxyModel_ ждёт в евент лупе, пока не придёт сигнал что реальная модель выполнила обработку
+    // запроса, после чего обращается к обычной модели напрямую
+    fsProxyModel_->setModel(fsSimpleModel);
+    // Нужно удалить fsSimpleModel при завершении потока
+    TreeBuilderThread* builderThread = new TreeBuilderThread(fsSimpleModel, progBar_, label_);
+    RunThread(builderThread);
+    // прокси шлёт сигналы на действия, которые модифицируют модель и ждёт ответа - подтверждения 
+    // после их завершения. Функции же, не модифицирующие объект, могут использоваться напрямую
+    fsProxyModel_->setRootPath(path);
 }
 
 void DirTreeBuilder::onError(const QString& errorMsg)
