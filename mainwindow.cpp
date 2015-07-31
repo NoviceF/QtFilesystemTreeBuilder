@@ -14,10 +14,10 @@
 MainWindow::MainWindow(QWidget* parent) :
     QMainWindow(parent),
     ui_(new Ui::MainWindow),
-    fsTreeModel_(nullptr),
     statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this)),
     iconProvider_(new QFileIconProvider()),
+    fsTreeModel_(nullptr),
     disks_(FillDisks())
 {
     ui_->setupUi(this);
@@ -82,10 +82,14 @@ void MainWindow::setTreeRootIndex(int)
 {
     const QString selectedPath = ui_->comboBox->currentData().toString();
 
-    // авто вызов delete
+//    fsTreeModel_.SetSourceModel(new SimpleFSModel);
+//    fsTreeModel_    // авто вызов delete
+//    std::shared_ptr<ProxyFSModel> oldModel(fsTreeModel_);
     std::shared_ptr<SimpleFSModel> oldModel(fsTreeModel_);
 
+//    fsTreeModel_ = new ProxyFSModel(this);
     fsTreeModel_ = new SimpleFSModel(this);
+//    fsTreeModel_->SetSourceModel(new SimpleFSModel);
     fsTreeModel_->setRootPath(selectedPath);
     ui_->treeView->setModel(fsTreeModel_);
 }

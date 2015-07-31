@@ -238,7 +238,6 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
 
 void SimpleFSModel::setRootPath(const QString& path)
 {
-//    const QFileInfoList drives = QDir::drives();
     QDir pathDir(path);
     pathDir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
     const QFileInfoList drives = pathDir.entryInfoList();
@@ -256,7 +255,7 @@ ProxyFSModel::ProxyFSModel(QObject* parent) :
 {
 }
 
-ProxyFSModel::~ProxyFSModel() /*override*/
+ProxyFSModel::~ProxyFSModel()
 {
 }
 
@@ -267,32 +266,52 @@ void ProxyFSModel::SetSourceModel(SimpleFSModel* model)
     fsModel_.reset(model);
 }
 
+void ProxyFSModel::setRootPath(const QString& path)
+{
+    fsModel_->setRootPath(path);
+}
+
+QFileInfo ProxyFSModel::fileInfo(const QModelIndex& index) const
+{
+    return fsModel_->fileInfo(index);
+}
+
+bool ProxyFSModel::canFetchMore(const QModelIndex& parent) const
+{
+    return fsModel_->canFetchMore(parent);
+}
+
+void ProxyFSModel::fetchMore(const QModelIndex& parent)
+{
+    fsModel_->fetchMore(parent);
+}
+
 QModelIndex ProxyFSModel::mapToSource(const QModelIndex& proxyIndex) const
 {
-
+    return proxyIndex;
 }
 
 QModelIndex ProxyFSModel::mapFromSource(const QModelIndex& sourceIndex) const
 {
-
+    return sourceIndex;
 }
 
 QModelIndex ProxyFSModel::index(int row, int column, const QModelIndex& parent) const
 {
-
+    return fsModel_->index(row, column, parent);
 }
 
 QModelIndex ProxyFSModel::parent(const QModelIndex& child) const
 {
-
+    return fsModel_->parent(child);
 }
 
 int ProxyFSModel::rowCount(const QModelIndex& parent) const
 {
-
+    return fsModel_->rowCount(parent);
 }
 
 int ProxyFSModel::columnCount(const QModelIndex& parent) const
 {
-
+    return fsModel_->columnCount(parent);
 }

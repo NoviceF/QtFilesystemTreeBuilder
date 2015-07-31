@@ -58,10 +58,14 @@ class ProxyFSModel : public QAbstractProxyModel
     Q_OBJECT
 
 public:
-    explicit ProxyFSModel(QObject* parent);
+    explicit ProxyFSModel(QObject* parent = nullptr);
     ~ProxyFSModel() override;
 
     void SetSourceModel(SimpleFSModel* model);
+    void setRootPath(const QString& path);
+
+    bool canFetchMore(const QModelIndex& parent) const;
+    void fetchMore(const QModelIndex& parent);
 
     QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
     QModelIndex mapFromSource(const QModelIndex& sourceIndex) const override;
@@ -72,6 +76,8 @@ public:
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override;
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
+
+    QFileInfo fileInfo(const QModelIndex &index) const;
 
 private:
     QScopedPointer <SimpleFSModel> fsModel_;
