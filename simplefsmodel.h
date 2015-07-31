@@ -64,9 +64,6 @@ public:
     void SetSourceModel(SimpleFSModel* model);
     void setRootPath(const QString& path);
 
-    bool canFetchMore(const QModelIndex& parent) const;
-    void fetchMore(const QModelIndex& parent);
-
     QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
     QModelIndex mapFromSource(const QModelIndex& sourceIndex) const override;
 
@@ -78,7 +75,11 @@ public:
     int columnCount(const QModelIndex &parent = QModelIndex()) const override;
 
     QVariant data(const QModelIndex& index, int role) const;
+
     QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+
+    bool canFetchMore(const QModelIndex& parent) const;
+    void fetchMore(const QModelIndex& parent);
 
     bool hasChildren(const QModelIndex& parent) const;
 

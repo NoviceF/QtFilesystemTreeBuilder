@@ -271,21 +271,6 @@ void ProxyFSModel::setRootPath(const QString& path)
     fsModel_->setRootPath(path);
 }
 
-QFileInfo ProxyFSModel::fileInfo(const QModelIndex& index) const
-{
-    return fsModel_->fileInfo(index);
-}
-
-bool ProxyFSModel::canFetchMore(const QModelIndex& parent) const
-{
-    return fsModel_->canFetchMore(parent);
-}
-
-void ProxyFSModel::fetchMore(const QModelIndex& parent)
-{
-    fsModel_->fetchMore(parent);
-}
-
 QModelIndex ProxyFSModel::mapToSource(const QModelIndex& proxyIndex) const
 {
     return proxyIndex;
@@ -314,4 +299,34 @@ int ProxyFSModel::rowCount(const QModelIndex& parent) const
 int ProxyFSModel::columnCount(const QModelIndex& parent) const
 {
     return fsModel_->columnCount(parent);
+}
+
+QVariant ProxyFSModel::data(const QModelIndex& index, int role) const
+{
+    return fsModel_->data(index, role);
+}
+
+QVariant ProxyFSModel::headerData(int section, Qt::Orientation orientation, int role) const
+{
+    return fsModel_->headerData(section, orientation, role);
+}
+
+bool ProxyFSModel::canFetchMore(const QModelIndex& parent) const
+{
+    return fsModel_->canFetchMore(parent);
+}
+
+void ProxyFSModel::fetchMore(const QModelIndex& parent)
+{
+    fsModel_->fetchMore(parent);
+}
+
+bool ProxyFSModel::hasChildren(const QModelIndex& parent) const
+{
+    return fsModel_->hasChildren(parent);
+}
+
+QFileInfo ProxyFSModel::fileInfo(const QModelIndex& index) const
+{
+    return fsModel_->fileInfo(index);
 }
