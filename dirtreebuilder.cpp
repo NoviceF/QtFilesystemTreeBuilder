@@ -38,8 +38,7 @@ void FsModelThread::onStart()
 DirTreeBuilder::DirTreeBuilder(QObject* parent) :
     Controller(parent),
     progBar_(nullptr),
-    label_(nullptr),
-    proxyModel_(nullptr)
+    label_(nullptr)
 {
 }
 
@@ -50,7 +49,7 @@ void DirTreeBuilder::BuildDirTree(const QString& path)
 
 //    // fsProxyModel_ ждёт в евент лупе, пока не придёт сигнал что реальная модель выполнила обработку
 //    // запроса, после чего обращается к обычной модели напрямую
-    proxyModel_->SetSourceModel(new SimpleFSModel);
+//    proxyModel_->SetSourceModel(new SimpleFSModel);
 //    // Нужно удалить fsSimpleModel перед установкой нового
 //    FsModelThread* builderThread = new FsModelThread(fsSimpleModel, progBar_, label_);
 //    RunThread(builderThread);

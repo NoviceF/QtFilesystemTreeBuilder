@@ -41,7 +41,6 @@ public slots:
 private:
     QProgressBar* progBar_;
     QLabel* label_;
-    ProxyFSModel* proxyModel_;
 };
 
 #endif // DIRTREEBUILDER_H

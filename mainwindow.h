@@ -38,7 +38,6 @@ private:
     DirTreeBuilder* treeBuilder_;
     QFileIconProvider* iconProvider_;
     SimpleFSModel* fsTreeModel_;
-//    ProxyFSModel* fsTreeModel_;
     const QVector<QFileInfo> disks_;
 };
 

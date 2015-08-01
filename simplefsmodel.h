@@ -53,40 +53,4 @@ private:
     QVariant nameData(const QFileInfo& fileInfo, int role) const;
 };
 
-class ProxyFSModel : public QAbstractProxyModel
-{
-    Q_OBJECT
-
-public:
-    explicit ProxyFSModel(QObject* parent = nullptr);
-    ~ProxyFSModel() override;
-
-    void SetSourceModel(SimpleFSModel* model);
-    void setRootPath(const QString& path);
-
-    QModelIndex mapToSource(const QModelIndex& proxyIndex) const override;
-    QModelIndex mapFromSource(const QModelIndex& sourceIndex) const override;
-
-    QModelIndex index(int row, int column,
-          const QModelIndex &parent = QModelIndex()) const override;
-    QModelIndex parent(const QModelIndex &child) const override;
-
-    int rowCount(const QModelIndex &parent = QModelIndex()) const override;
-    int columnCount(const QModelIndex &parent = QModelIndex()) const override;
-
-    QVariant data(const QModelIndex& index, int role) const;
-
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
-
-    bool canFetchMore(const QModelIndex& parent) const;
-    void fetchMore(const QModelIndex& parent);
-
-    bool hasChildren(const QModelIndex& parent) const;
-
-    QFileInfo fileInfo(const QModelIndex &index) const;
-
-private:
-    QScopedPointer <SimpleFSModel> fsModel_;
-};
-
 #endif // SIMPLEFSMODEL_H

@@ -220,10 +220,12 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
 
     parentInfo->mapped = true;
 
-    if (children.isEmpty())
-        return;
 
-    beginInsertRows(parent, 0, children.size() - 1);
+    const int insrtCnt = children.isEmpty() ?
+                0 :
+                children.size() - 1;
+
+    beginInsertRows(parent, 0, insrtCnt);
     parentInfo->children.reserve(children.size());
 
     for (const QFileInfo& entry: children)
@@ -244,89 +246,3 @@ void SimpleFSModel::setRootPath(const QString& path)
     qCopy(drives.begin(), drives.end(), std::back_inserter(nodes_));
 }
 
-///
-/// \brief ProxyFSModel
-///
-
-ProxyFSModel::ProxyFSModel(QObject* parent) :
-    QAbstractProxyModel(parent),
-    fsModel_(nullptr)
-
-{
-}
-
-ProxyFSModel::~ProxyFSModel()
-{
-}
-
-void ProxyFSModel::SetSourceModel(SimpleFSModel* model)
-{
-    QAbstractProxyModel::setSourceModel(model);
-
-    fsModel_.reset(model);
-}
-
-void ProxyFSModel::setRootPath(const QString& path)
-{
-    fsModel_->setRootPath(path);
-}
-
-QModelIndex ProxyFSModel::mapToSource(const QModelIndex& proxyIndex) const
-{
-    return proxyIndex;
-}
-
-QModelIndex ProxyFSModel::mapFromSource(const QModelIndex& sourceIndex) const
-{
-    return sourceIndex;
-}
-
-QModelIndex ProxyFSModel::index(int row, int column, const QModelIndex& parent) const
-{
-    return fsModel_->index(row, column, parent);
-}
-
-QModelIndex ProxyFSModel::parent(const QModelIndex& child) const
-{
-    return fsModel_->parent(child);
-}
-
-int ProxyFSModel::rowCount(const QModelIndex& parent) const
-{
-    return fsModel_->rowCount(parent);
-}
-
-int ProxyFSModel::columnCount(const QModelIndex& parent) const
-{
-    return fsModel_->columnCount(parent);
-}
-
-QVariant ProxyFSModel::data(const QModelIndex& index, int role) const
-{
-    return fsModel_->data(index, role);
-}
-
-QVariant ProxyFSModel::headerData(int section, Qt::Orientation orientation, int role) const
-{
-    return fsModel_->headerData(section, orientation, role);
-}
-
-bool ProxyFSModel::canFetchMore(const QModelIndex& parent) const
-{
-    return fsModel_->canFetchMore(parent);
-}
-
-void ProxyFSModel::fetchMore(const QModelIndex& parent)
-{
-    fsModel_->fetchMore(parent);
-}
-
-bool ProxyFSModel::hasChildren(const QModelIndex& parent) const
-{
-    return fsModel_->hasChildren(parent);
-}
-
-QFileInfo ProxyFSModel::fileInfo(const QModelIndex& index) const
-{
-    return fsModel_->fileInfo(index);
-}
