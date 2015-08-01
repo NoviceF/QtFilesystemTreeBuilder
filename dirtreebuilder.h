@@ -13,32 +13,21 @@
 class RemoteFetcherThread : public IProgressWorker
 {
     Q_OBJECT
-public:
-    enum class FetchType
-    {
-        FetchRoot = 0,
-        FetchFolder,
-        NoFetch
-    };
 
+public:
     RemoteFetcherThread(const QString& rootPath, SimpleFSModel* fsModel,
             QProgressBar* progBar, QLabel* label, QObject* parent = 0);
 
-private:
+public slots:
     void FetchRoot();
     void FetchFolder(const QString& path);
-
-public slots:
-    virtual void onStart();
-    virtual void setFetchParams(FetchType type, const QString& path = QString());
-
 
 private:
     SimpleFSModel* fsModel_;
     QString root_;
     bool abort_;
-    FetchType fetchType_;
 };
+
 
 class DirTreeBuilder : public Controller
 {
@@ -47,14 +36,10 @@ class DirTreeBuilder : public Controller
 public:
     explicit DirTreeBuilder(QObject* parent = 0);
     void BuildDirTree(const QString& path);
-
-public slots:
-    virtual void onError(const QString& errorMsg);
-    virtual void onWorkDone();
+    QString GetFilePathByIndex(const QModelIndex& index);
 
 private:
-    QProgressBar* progBar_;
-    QLabel* label_;
+    SimpleFSModel* fsModel_;
 };
 
 #endif // DIRTREEBUILDER_H

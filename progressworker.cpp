@@ -14,3 +14,4 @@ IProgressWorker::IProgressWorker(QProgressBar* progBar, QLabel* label,
    connect(this, SIGNAL(showLabel()), label, SLOT(show()));
    connect(this, SIGNAL(hideLabel()), label, SLOT(hide()));
 }
+//TODO: отвязывать сигналы в деструкторе

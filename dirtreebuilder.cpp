@@ -26,54 +26,33 @@ RemoteFetcherThread::RemoteFetcherThread(const QString& rootPath,
     }
 }
 
-void RemoteFetcherThread::onStart()
-{
-    setLabel("Building directory tree..");
-
-    emit finished();
-}
-
-void RemoteFetcherThread::setFetchParams(RemoteFetcherThread::FetchType type,
-    const QString& path)
-{
-    switch (type)
-    {
-        case FetchType::FetchRoot :
-            FetchRoot();
-            break;
-        case FetchType::FetchFolder :
-            FetchFolder(path);
-            break;
-        default:
-            return;
-    }
-}
 
 ///
 /// \brief DirTreeBuilder
 ///
 DirTreeBuilder::DirTreeBuilder(QObject* parent) :
     Controller(parent),
-    progBar_(nullptr),
-    label_(nullptr)
-{
-}
+    fsModel_(nullptr)
+{}
 
 void DirTreeBuilder::BuildDirTree(const QString& path)
 {
     if (IsRunning())
         RemoveThread();
 
-//    // fsProxyModel_ ждёт в евент лупе, пока не придёт сигнал что реальная модель выполнила обработку
-//    // запроса, после чего обращается к обычной модели напрямую
-//    proxyModel_->SetSourceModel(new SimpleFSModel);
-//    // Нужно удалить fsSimpleModel перед установкой нового
-//    FsModelThread* builderThread = new FsModelThread(fsSimpleModel, progBar_, label_);
-//    RunThread(builderThread);
-//    // прокси шлёт сигналы на действия, которые модифицируют модель и ждёт ответа - подтверждения
-//    // после их завершения. Функции же, не модифицирующие объект, могут использоваться напрямую
-//    fsProxyModel_->setRootPath(path);
+    SimpleFSModel* fsModel = new SimpleFSModel;
+    fsModel->setRootPath(path);
+
 }
+
+QString DirTreeBuilder::GetFilePathByIndex(const QModelIndex& index)
+{
+    if (fsModel_)
+        return fsModel_->fileInfo(index).absoluteFilePath();
+    else
+        return QString();
+}
+
 
 void DirTreeBuilder::onError(const QString& errorMsg)
 {

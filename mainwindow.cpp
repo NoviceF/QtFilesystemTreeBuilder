@@ -17,7 +17,6 @@ MainWindow::MainWindow(QWidget* parent) :
     statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this)),
     iconProvider_(new QFileIconProvider()),
-    fsTreeModel_(nullptr),
     disks_(FillDisks())
 {
     ui_->setupUi(this);
@@ -82,14 +81,16 @@ void MainWindow::setTreeRootIndex(int)
 {
     const QString selectedPath = ui_->comboBox->currentData().toString();
 
-    fsTreeModel_ = new SimpleFSModel(this);
-    fsTreeModel_->setRootPath(selectedPath);
-    ui_->treeView->setModel(fsTreeModel_);
+    treeBuilder_->BuildDirTree(selectedPath);
+
+//    fsTreeModel_ = new SimpleFSModel(this);
+//    fsTreeModel_->setRootPath(selectedPath);
+//    ui_->treeView->setModel(fsTreeModel_);
 }
 
 void MainWindow::processStatRequest(const QModelIndex& index)
 {
-    const QString selectedPath = fsTreeModel_->fileInfo(index).absoluteFilePath();
+    const QString selectedPath = treeBuilder_->GetFilePathByIndex(index);
     statGetter_->GetStatsForPath(selectedPath);
 }
 

@@ -35,9 +35,9 @@ private:
 private:
     Ui::MainWindow* ui_;
     StatGetter* statGetter_;
-    DirTreeBuilder* treeBuilder_;
     QFileIconProvider* iconProvider_;
-    SimpleFSModel* fsTreeModel_;
+    DirTreeBuilder* treeBuilder_;
+//    SimpleFSModel* fsTreeModel_;
     const QVector<QFileInfo> disks_;
 };
 
