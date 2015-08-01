@@ -41,7 +41,7 @@ private:
     size_t GetTotalGroupFilesSize(const infovec_t& infoList);
 
 public slots:
-    virtual void onStart();
+    void onStart();
 
 private:
     QString path_;

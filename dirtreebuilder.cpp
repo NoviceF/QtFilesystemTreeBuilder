@@ -11,12 +11,13 @@
 
 #include "dirtreebuilder.h"
 
-FsModelThread::FsModelThread(const QString& rootPath, SimpleFSModel& fsModel,
-        QProgressBar* progBar, QLabel* label, QObject* parent) :
+RemoteFetcherThread::RemoteFetcherThread(const QString& rootPath,
+    SimpleFSModel* fsModel, QProgressBar* progBar, QLabel* label, QObject* parent) :
     IProgressWorker(progBar, label, parent),
     fsModel_(fsModel),
     root_(rootPath),
-    abort_(false)
+    abort_(false),
+    fetchType_(FetchType::NoFetch)
 {
     if (root_.isEmpty())
     {
@@ -25,11 +26,27 @@ FsModelThread::FsModelThread(const QString& rootPath, SimpleFSModel& fsModel,
     }
 }
 
-void FsModelThread::onStart()
+void RemoteFetcherThread::onStart()
 {
     setLabel("Building directory tree..");
 
     emit finished();
+}
+
+void RemoteFetcherThread::setFetchParams(RemoteFetcherThread::FetchType type,
+    const QString& path)
+{
+    switch (type)
+    {
+        case FetchType::FetchRoot :
+            FetchRoot();
+            break;
+        case FetchType::FetchFolder :
+            FetchFolder(path);
+            break;
+        default:
+            return;
+    }
 }
 
 ///

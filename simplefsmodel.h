@@ -13,6 +13,9 @@ class QFileInfo;
 class SimpleFSModel : public QAbstractItemModel
 {
     Q_OBJECT
+
+    friend class RemoteFetcherThread;
+
 public:
     explicit SimpleFSModel(QObject* parent = nullptr);
     ~SimpleFSModel();

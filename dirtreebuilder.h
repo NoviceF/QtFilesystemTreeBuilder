@@ -10,20 +10,34 @@
 #include <progressworker.h>
 
 
-class FsModelThread : public IProgressWorker
+class RemoteFetcherThread : public IProgressWorker
 {
     Q_OBJECT
 public:
-    explicit FsModelThread(const QString& rootPath, SimpleFSModel& fsModel,
+    enum class FetchType
+    {
+        FetchRoot = 0,
+        FetchFolder,
+        NoFetch
+    };
+
+    RemoteFetcherThread(const QString& rootPath, SimpleFSModel* fsModel,
             QProgressBar* progBar, QLabel* label, QObject* parent = 0);
+
+private:
+    void FetchRoot();
+    void FetchFolder(const QString& path);
 
 public slots:
     virtual void onStart();
+    virtual void setFetchParams(FetchType type, const QString& path = QString());
+
 
 private:
-    SimpleFSModel& fsModel_;
+    SimpleFSModel* fsModel_;
     QString root_;
     bool abort_;
+    FetchType fetchType_;
 };
 
 class DirTreeBuilder : public Controller

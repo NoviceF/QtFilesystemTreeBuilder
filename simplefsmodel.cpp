@@ -218,9 +218,6 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
     QFileInfoList children = dir.entryInfoList(QStringList(), QDir::Dirs |
        QDir::NoDotAndDotDot, QDir::Name);
 
-    parentInfo->mapped = true;
-
-
     const int insrtCnt = children.isEmpty() ?
                 0 :
                 children.size() - 1;
@@ -235,6 +232,8 @@ void SimpleFSModel::fetchMore(const QModelIndex &parent)
         parentInfo->children.push_back(std::move(nodeInfo));
     }
 
+    parentInfo->mapped = true;
+
     endInsertRows();
 }
 
@@ -242,7 +241,6 @@ void SimpleFSModel::setRootPath(const QString& path)
 {
     QDir pathDir(path);
     pathDir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    const QFileInfoList drives = pathDir.entryInfoList();
-    qCopy(drives.begin(), drives.end(), std::back_inserter(nodes_));
+    const QFileInfoList folders = pathDir.entryInfoList();
+    qCopy(folders.begin(), folders.end(), std::back_inserter(nodes_));
 }
-

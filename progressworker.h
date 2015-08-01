@@ -24,9 +24,6 @@ signals:
     void showLabel();
     void hideLabel();
     void setLabel(const QString& text);
-
-public slots:
-    virtual void onStart() = 0;
 };
 
 #endif // PROGRESSWORKER_H
