@@ -4,11 +4,40 @@
 
 #include <QAbstractItemModel>
 #include <QAbstractProxyModel>
+#include <QFileInfo>
 #include <QScopedPointer>
 #include <QVector>
 
 class QFileIconProvider;
-class QFileInfo;
+
+struct NodeInfo
+{
+    NodeInfo():
+        parent(0),
+        mapped(false)
+    {}
+
+    NodeInfo(const QFileInfo& fileInfo, NodeInfo* parent = 0):
+        fileInfo(fileInfo),
+        parent(parent),
+        mapped(false)
+    {}
+
+    bool operator ==(const NodeInfo& another) const
+    {
+        bool r = this->fileInfo == another.fileInfo;
+        Q_ASSERT(!r || this->parent == another.parent);
+        Q_ASSERT(!r || this->mapped == another.mapped);
+        Q_ASSERT(!r || this->children == another.children);
+        return r;
+    }
+
+    QFileInfo fileInfo;
+    QVector<NodeInfo> children;
+    NodeInfo* parent;
+
+    bool mapped;
+};
 
 class SimpleFSModel : public QAbstractItemModel
 {
@@ -39,6 +68,18 @@ public:
 
     QFileInfo fileInfo(const QModelIndex& index) const;
 
+signals:
+    void setRootInThread(const QString& root);
+    void fetchFolderInThread(const QModelIndex& index);
+    void breakWaitLoop();
+
+public slots:
+    void onThreadWorkDone();
+
+private:
+    int findRow(const NodeInfo* nodeInfo) const;
+    QVariant nameData(const QFileInfo& fileInfo, int role) const;
+
 private:
     enum Columns
     {
@@ -47,13 +88,9 @@ private:
         ColumnCount
     };
 
-    struct NodeInfo;
     typedef QVector<NodeInfo> NodeInfoList;
     NodeInfoList nodes_;
     QScopedPointer<QFileIconProvider> metaProvider_;
-
-    int findRow(const NodeInfo* nodeInfo) const;
-    QVariant nameData(const QFileInfo& fileInfo, int role) const;
 };
 
 #endif // SIMPLEFSMODEL_H

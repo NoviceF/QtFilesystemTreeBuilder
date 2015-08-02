@@ -20,12 +20,11 @@ public:
     QProgressBar* GetProgBar();
     void SetLabel(QLabel* label);
     QLabel* GetLabel();
-    virtual void SetView(QAbstractItemView*);
-    virtual QAbstractItemView* GetView();
+    const QThread& GetWorkerThread();
 
 protected:
     explicit Controller(QObject* parent = 0);
-    ~Controller() = default;
+    ~Controller();
 
 private:
     void RiseErrorMsg(const QString& msg);

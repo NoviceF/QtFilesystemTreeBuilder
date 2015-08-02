@@ -30,6 +30,32 @@ MainWindow::MainWindow(QWidget* parent) :
     connect(ui_->treeView, SIGNAL(clicked(QModelIndex)), this,
             SLOT(processStatRequest(QModelIndex)));
 
+    // init table widget
+    ui_->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui_->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui_->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
+
+    // init statusbar
+    QProgressBar* progBar = new QProgressBar;
+    progBar->setAlignment(Qt::AlignRight);
+
+    QLabel* label = new QLabel;
+    label->setAlignment(Qt::AlignCenter);
+
+    statusBar()->addWidget(label, 1);
+    statusBar()->addWidget(progBar, 1);
+
+    progBar->hide();
+
+    // init worker classes
+    treeBuilder_->SetProgBar(progBar);
+    treeBuilder_->SetLabel(label);
+    treeBuilder_->SetView(ui_->treeView);
+
+    statGetter_->SetProgBar(progBar);
+    statGetter_->SetLabel(label);
+    statGetter_->SetView(ui_->tableWidget);
+
     // init combobox
     for (const QFileInfo& diskInfo : disks_)
     {
@@ -45,31 +71,6 @@ MainWindow::MainWindow(QWidget* parent) :
 
     ui_->comboBox->setSizeAdjustPolicy(QComboBox::AdjustToContents);
     ui_->comboBox->setCurrentIndex(0);
-
-    // init statusbar
-    QProgressBar* progBar = new QProgressBar;
-    progBar->setAlignment(Qt::AlignRight);
-
-    QLabel* label = new QLabel;
-    label->setAlignment(Qt::AlignCenter);
-
-    statusBar()->addWidget(label, 1);
-    statusBar()->addWidget(progBar, 1);
-
-    progBar->hide();
-
-    // init table widget
-    ui_->tableWidget->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui_->tableWidget->verticalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    ui_->tableWidget->setEditTriggers(QAbstractItemView::NoEditTriggers);
-
-    // init worker class
-    treeBuilder_->SetProgBar(progBar);
-    treeBuilder_->SetLabel(label);
-
-    statGetter_->SetProgBar(progBar);
-    statGetter_->SetLabel(label);
-    statGetter_->SetView(ui_->tableWidget);
 }
 
 MainWindow::~MainWindow()
@@ -80,12 +81,7 @@ MainWindow::~MainWindow()
 void MainWindow::setTreeRootIndex(int)
 {
     const QString selectedPath = ui_->comboBox->currentData().toString();
-
     treeBuilder_->BuildDirTree(selectedPath);
-
-//    fsTreeModel_ = new SimpleFSModel(this);
-//    fsTreeModel_->setRootPath(selectedPath);
-//    ui_->treeView->setModel(fsTreeModel_);
 }
 
 void MainWindow::processStatRequest(const QModelIndex& index)

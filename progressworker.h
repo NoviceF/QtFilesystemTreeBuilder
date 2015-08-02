@@ -12,7 +12,7 @@ class IProgressWorker : public QObject
 
 public:
     IProgressWorker(QProgressBar* progBar, QLabel* label, QObject* parent);
-    virtual ~IProgressWorker(){}
+    virtual ~IProgressWorker();
 
 signals:
     void finished();
@@ -24,6 +24,10 @@ signals:
     void showLabel();
     void hideLabel();
     void setLabel(const QString& text);
+
+private:
+    const QProgressBar* progBar_;
+    const QLabel* label_;
 };
 
 #endif // PROGRESSWORKER_H

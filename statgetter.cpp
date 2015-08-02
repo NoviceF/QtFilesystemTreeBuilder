@@ -118,8 +118,10 @@ void StatGetterThread::onStart()
 ///
 /// \brief StatGetter
 ///
+
 StatGetter::StatGetter(QObject* parent) :
     Controller(parent),
+    tableWidget_(nullptr),
     subdirsInCurPathCount_(0)
 {
 }
@@ -139,10 +141,12 @@ void StatGetter::GetStatsForPath(const QString& rootPath)
     subdirsInCurPathCount_ = 0;
     StatsCont cont {statTree_, subdirsInCurPathCount_};
 
-    StatGetterThread* statGetterThread = new StatGetterThread(rootPath, cont,
-        GetProgBar(), GetLabel());
+    currentThreadClass_.reset(new StatGetterThread(rootPath, cont,
+        GetProgBar(), GetLabel()) );
+    connect(&GetWorkerThread(), SIGNAL(started()), currentThreadClass_.data(),
+        SLOT(onStart()));
 
-    RunThread(statGetterThread);
+    RunThread(currentThreadClass_.data());
 }
 
 void StatGetter::SetView(QTableWidget* view)
@@ -246,14 +250,8 @@ void StatGetter::AddTableRow(int& rowNumber, const QString& name,
     ++rowNumber;
 }
 
-void StatGetter::onError(const QString& errorMsg)
-{
-    Controller::onError(errorMsg);
-}
-
 void StatGetter::onWorkDone()
 {
     FillWidgetTable();
     Controller::onWorkDone();
 }
-

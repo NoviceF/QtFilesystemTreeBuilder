@@ -1,6 +1,5 @@
-﻿#include <QFileInfo>
-#include <QDir>
-#include <algorithm>
+﻿#include <QDir>
+#include <QEventLoop>
 #include <QFileIconProvider>
 #include <QDateTime>
 #include <QDebug>
@@ -16,35 +15,6 @@ SimpleFSModel::SimpleFSModel(QObject* parent) :
 SimpleFSModel::~SimpleFSModel()
 {}
 
-
-struct SimpleFSModel::NodeInfo
-{
-    NodeInfo():
-        parent(0),
-        mapped(false)
-    {}
-
-    NodeInfo(const QFileInfo& fileInfo, NodeInfo* parent = 0):
-        fileInfo(fileInfo),
-        parent(parent),
-        mapped(false)
-    {}
-
-    bool operator ==(const NodeInfo& another) const
-    {
-        bool r = this->fileInfo == another.fileInfo;
-        Q_ASSERT(!r || this->parent == another.parent);
-        Q_ASSERT(!r || this->mapped == another.mapped);
-        Q_ASSERT(!r || this->children == another.children);
-        return r;
-    }
-
-    QFileInfo fileInfo;
-    QVector<NodeInfo> children;
-    NodeInfo* parent;
-
-    bool mapped;
-};
 
 QModelIndex SimpleFSModel::index(int row, int column,
      const QModelIndex& parent) const
@@ -128,6 +98,11 @@ QFileInfo SimpleFSModel::fileInfo(const QModelIndex& index) const
     return static_cast<NodeInfo*>(index.internalPointer())->fileInfo;
 }
 
+void SimpleFSModel::onThreadWorkDone()
+{
+    emit breakWaitLoop();
+}
+
 int SimpleFSModel::columnCount(const QModelIndex&) const
 {
     return ColumnCount;
@@ -203,44 +178,29 @@ bool SimpleFSModel::canFetchMore(const QModelIndex &parent) const
     return !parentInfo->mapped;
 }
 
-void SimpleFSModel::fetchMore(const QModelIndex &parent)
+void SimpleFSModel::fetchMore(const QModelIndex& parent)
 {
-    Q_ASSERT(parent.isValid());
-    NodeInfo* parentInfo = static_cast<NodeInfo*>(parent.internalPointer());
-    Q_ASSERT(parentInfo != 0);
-    Q_ASSERT(!parentInfo->mapped);
+    QEventLoop waitLoop;
+    connect(this, SIGNAL(breakWaitLoop()), &waitLoop, SLOT(quit()));
 
-    const QFileInfo& fileInfo = parentInfo->fileInfo;
-    Q_ASSERT(fileInfo.isDir());
+    emit fetchFolderInThread(parent);
 
-    QDir dir = QDir(fileInfo.absoluteFilePath());
-
-    QFileInfoList children = dir.entryInfoList(QStringList(), QDir::Dirs |
-       QDir::NoDotAndDotDot, QDir::Name);
-
-    const int insrtCnt = children.isEmpty() ?
-                0 :
-                children.size() - 1;
-
-    beginInsertRows(parent, 0, insrtCnt);
-    parentInfo->children.reserve(children.size());
-
-    for (const QFileInfo& entry: children)
-    {
-        NodeInfo nodeInfo(entry, parentInfo);
-        nodeInfo.mapped = !entry.isDir();
-        parentInfo->children.push_back(std::move(nodeInfo));
-    }
-
-    parentInfo->mapped = true;
-
-    endInsertRows();
+    waitLoop.exec();
 }
 
 void SimpleFSModel::setRootPath(const QString& path)
 {
-    QDir pathDir(path);
-    pathDir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
-    const QFileInfoList folders = pathDir.entryInfoList();
-    qCopy(folders.begin(), folders.end(), std::back_inserter(nodes_));
+    QEventLoop waitLoop;
+    connect(this, SIGNAL(breakWaitLoop()), &waitLoop, SLOT(quit()));
+
+    emit setRootInThread(path);
+
+    waitLoop.exec();
 }
+
+
+
+
+
+
+

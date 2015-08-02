@@ -22,8 +22,6 @@ struct StatsCont
     size_t& subdirsCount;
 };
 
-
-
 class StatGetterThread : public IProgressWorker
 {
     Q_OBJECT
@@ -63,18 +61,17 @@ public:
     size_t GetTotalFilesSize() const;
     size_t GetAvgSizeAllFiles() const;
 
-
 private:
     void FillWidgetTable();
     void AddTableRow(int& rowNumber, const QString& name,
-                     const size_t* value = nullptr);
+         const size_t* value = nullptr);
 
 public slots:
-    virtual void onError(const QString& errorMsg);
     virtual void onWorkDone();
 
 private:
     QTableWidget* tableWidget_;
+    QScopedPointer<StatGetterThread> currentThreadClass_;
     size_t subdirsInCurPathCount_;
     QString pathInWork_;
     stattree_t statTree_;

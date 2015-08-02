@@ -11,19 +11,17 @@ Controller::Controller(QObject* parent):
 {
 }
 
-void Controller::RunThread(IProgressWorker* worker)
+Controller::~Controller()
 {
     if (running_)
-        return;
+        RemoveThread();
+}
+
+void Controller::RunThread(IProgressWorker* worker)
+{
+    assert(!running_);
 
     worker->moveToThread(&workerThread_);
-
-    connect(worker, SIGNAL(error(QString)), this, SLOT(onError(QString)));
-
-    connect(&workerThread_, SIGNAL(started()), worker, SLOT(onStart()));
-
-    connect(worker, SIGNAL(finished()), &workerThread_, SLOT(quit()));
-    connect(worker, SIGNAL(finished()), worker, SLOT(deleteLater()));
 
     connect(worker, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(worker, SIGNAL(finished()), this, SLOT(onWorkDone()));
@@ -85,16 +83,10 @@ QLabel* Controller::GetLabel()
     return label_;
 }
 
-/*virtual*/ void Controller::SetView(QAbstractItemView*)
+const QThread& Controller::GetWorkerThread()
 {
-    throw std::runtime_error("Controller::SetView: Not implemented.");
+    return workerThread_;
 }
-
-/*virtual*/ QAbstractItemView* Controller::GetView()
-{
-    throw std::runtime_error("Controller::GetView: Not implemented.");
-}
-
 
 void Controller::RiseErrorMsg(const QString& msg)
 {
@@ -110,7 +102,7 @@ void Controller::RiseErrorMsg(const QString& msg)
 
 void Controller::onError(const QString &errorMsg)
 {
-    RemoveThread();
+//    RemoveThread();
     RiseErrorMsg(errorMsg);
 }
 
