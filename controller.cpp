@@ -21,9 +21,11 @@ void Controller::RunThread(IProgressWorker* worker)
 {
     assert(!running_);
 
+    if (running_)
+        return;
+
     worker->moveToThread(&workerThread_);
 
-    connect(worker, SIGNAL(error(QString)), this, SLOT(onError(QString)));
     connect(worker, SIGNAL(finished()), this, SLOT(onWorkDone()));
 
     workerThread_.start();
@@ -52,34 +54,34 @@ void Controller::RiseRunningThreadWarningMsg()
 void Controller::SetProgBar(QProgressBar* progBar)
 {
     progBar_ = progBar;
-
-    if (!progBar_)
-    {
-        throw std::runtime_error("DirTreeBuilder::BuildDirTree: Progress bar "
-             "must be set before use.");
-    }
+    assert(progBar_);
 }
 
 QProgressBar* Controller::GetProgBar()
 {
-    assert(progBar_);
+    if (!progBar_)
+    {
+        throw std::runtime_error("Controler::GetProgBar: Progress bar "
+             "must be set before use.");
+    }
+
     return progBar_;
 }
 
 void Controller::SetLabel(QLabel* label)
 {
     label_ = label;
-
-    if (!label_)
-    {
-        throw std::runtime_error("DirTreeBuilder::BuildDirTree: Label "
-             "must be set before use.");
-    }
+    assert(label_);
 }
 
 QLabel* Controller::GetLabel()
 {
-    assert(label_);
+    if (!label_)
+    {
+        throw std::runtime_error("Controller::SetLabel: Label "
+             "must be set before use.");
+    }
+
     return label_;
 }
 
@@ -98,12 +100,6 @@ void Controller::RiseErrorMsg(const QString& msg)
     msgBox.setStandardButtons(QMessageBox::Ok);
     msgBox.setDefaultButton(QMessageBox::Ok);
     msgBox.exec();
-}
-
-void Controller::onError(const QString &errorMsg)
-{
-//    RemoveThread();
-    RiseErrorMsg(errorMsg);
 }
 
 void Controller::onWorkDone()

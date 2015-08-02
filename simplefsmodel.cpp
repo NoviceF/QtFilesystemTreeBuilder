@@ -1,8 +1,6 @@
 ﻿#include <QDir>
 #include <QEventLoop>
 #include <QFileIconProvider>
-#include <QDateTime>
-#include <QDebug>
 
 #include "simplefsmodel.h"
 
@@ -14,7 +12,6 @@ SimpleFSModel::SimpleFSModel(QObject* parent) :
 
 SimpleFSModel::~SimpleFSModel()
 {}
-
 
 QModelIndex SimpleFSModel::index(int row, int column,
      const QModelIndex& parent) const
@@ -122,15 +119,12 @@ QVariant SimpleFSModel::data(const QModelIndex& index, int role) const
     case NameColumn:
         return nameData(fileInfo, role);
     default:
-        break;
+        return QVariant();
     }
-
-    return QVariant();
 }
 
 QVariant SimpleFSModel::nameData(const QFileInfo &fileInfo, int role) const
 {
-
     switch (role)
     {
         case Qt::DisplayRole:

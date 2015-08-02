@@ -1,7 +1,6 @@
 ﻿#ifndef CONTROLLER_H
 #define CONTROLLER_H
 
-#include <QAbstractItemView>
 #include <QObject>
 #include <QThread>
 
@@ -33,7 +32,6 @@ signals:
     void closeMsgBox();
 
 public slots:
-    virtual void onError(const QString& errorMsg);
     virtual void onWorkDone();
 
 private:

@@ -1,11 +1,8 @@
 ﻿#ifndef SIMPLEFSMODEL_H
 #define SIMPLEFSMODEL_H
 
-
 #include <QAbstractItemModel>
-#include <QAbstractProxyModel>
 #include <QFileInfo>
-#include <QScopedPointer>
 #include <QVector>
 
 class QFileIconProvider;
@@ -13,11 +10,11 @@ class QFileIconProvider;
 struct NodeInfo
 {
     NodeInfo():
-        parent(0),
+        parent(nullptr),
         mapped(false)
     {}
 
-    NodeInfo(const QFileInfo& fileInfo, NodeInfo* parent = 0):
+    NodeInfo(const QFileInfo& fileInfo, NodeInfo* parent = nullptr):
         fileInfo(fileInfo),
         parent(parent),
         mapped(false)
@@ -51,20 +48,20 @@ public:
 
     void setRootPath(const QString& path);
 
-    QModelIndex index(int row, int column, const QModelIndex& parent) const;
-    QModelIndex parent(const QModelIndex& child) const;
+    QModelIndex index(int row, int column, const QModelIndex& parent) const override;
+    QModelIndex parent(const QModelIndex& child) const override;
 
-    int rowCount(const QModelIndex& parent) const;
-    int columnCount(const QModelIndex& parent) const;
+    int rowCount(const QModelIndex& parent) const override;
+    int columnCount(const QModelIndex& parent) const override;
 
-    QVariant data(const QModelIndex& index, int role) const;
+    QVariant data(const QModelIndex& index, int role) const override;
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const;
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
 
-    bool canFetchMore(const QModelIndex& parent) const;
-    void fetchMore(const QModelIndex& parent);
+    bool canFetchMore(const QModelIndex& parent) const override;
+    void fetchMore(const QModelIndex& parent) override;
 
-    bool hasChildren(const QModelIndex& parent) const;
+    bool hasChildren(const QModelIndex& parent) const override;
 
     QFileInfo fileInfo(const QModelIndex& index) const;
 

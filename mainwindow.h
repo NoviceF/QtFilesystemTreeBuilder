@@ -3,13 +3,8 @@
 
 #include <QMainWindow>
 #include <QFileIconProvider>
-#include <QFileSystemModel>
-#include <QTreeView>
-#include <QListView>
-#include <QString>
 
 #include "dirtreebuilder.h"
-#include <simplefsmodel.h>
 #include "statgetter.h"
 
 namespace Ui {
@@ -30,13 +25,13 @@ private slots:
 
 private:
     void SetPositionCenter();
-    static QVector<QFileInfo> FillDisks();
+    static QVector<QFileInfo> GetDisks();
 
 private:
     Ui::MainWindow* ui_;
     StatGetter* statGetter_;
     DirTreeBuilder* treeBuilder_;
-    QFileIconProvider* iconProvider_;
+    const QFileIconProvider* iconProvider_;
     const QVector<QFileInfo> disks_;
 };
 

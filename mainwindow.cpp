@@ -1,12 +1,5 @@
-﻿#include <algorithm>
-#include <cassert>
-#include <memory>
-
-
-#include <QDebug>
-#include <QDesktopWidget>
-#include <QProgressBar>
-#include <QTimer>
+﻿#include <QDesktopWidget>
+#include <QDir>
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -17,7 +10,7 @@ MainWindow::MainWindow(QWidget* parent) :
     statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this)),
     iconProvider_(new QFileIconProvider()),
-    disks_(FillDisks())
+    disks_(GetDisks())
 {
     ui_->setupUi(this);
 
@@ -108,7 +101,7 @@ void MainWindow::SetPositionCenter()
     this->move(widthPos,heightPos);
 }
 
-/*static*/ QVector<QFileInfo> MainWindow::FillDisks()
+/*static*/ QVector<QFileInfo> MainWindow::GetDisks()
 {
     QVector<QFileInfo> disks;
     const QFileInfoList drives = QDir::drives();
