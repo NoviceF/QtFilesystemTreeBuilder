@@ -132,8 +132,7 @@ void RemoteFetcherThread::FetchFolder(const QModelIndex& parent)
 ///
 DirTreeBuilder::DirTreeBuilder(QObject* parent) :
     Controller(parent),
-    view_(nullptr),
-    fsModel_(nullptr)
+    view_(nullptr)
 {}
 
 void DirTreeBuilder::BuildDirTree(const QString& path)
@@ -141,22 +140,12 @@ void DirTreeBuilder::BuildDirTree(const QString& path)
     if (IsRunning())
         RemoveThread();
 
-    fsModel_ = new SimpleFSModel;
+    fsModel_.reset(new SimpleFSModel);
 
-    RemoteFetcherThread* fetchThread = new RemoteFetcherThread(fsModel_, GetProgBar(),
-       GetLabel());
-
-    connect(fsModel_, SIGNAL(setRootInThread(QString)), fetchThread,
-        SLOT(handle_fetchRoot(QString)));
-    connect(fsModel_, SIGNAL(fetchFolderInThread(QModelIndex)), fetchThread,
-            SLOT(handle_fetchFolder(QModelIndex)));
-
-    connect(fetchThread, SIGNAL(finished()), fsModel_, SLOT(onThreadWorkDone()));
-
-    RunThread(fetchThread);
+    RunThread(CreateFetchThread());
 
     fsModel_->setRootPath(path);
-    view_->setModel(fsModel_);
+    view_->setModel(fsModel_.data());
 }
 
 QString DirTreeBuilder::GetFilePathByIndex(const QModelIndex& index)
@@ -173,6 +162,22 @@ void DirTreeBuilder::SetView(QTreeView* view)
         throw std::runtime_error("DirTreeBuilder::SetView: view is null.");
 
     view_ = view;
+}
+
+RemoteFetcherThread*DirTreeBuilder::CreateFetchThread()
+{
+    fetchThread_.reset(new RemoteFetcherThread(fsModel_.data(),
+        GetProgBar(), GetLabel()));
+
+    connect(fsModel_.data(), SIGNAL(setRootInThread(QString)), fetchThread_.data(),
+        SLOT(handle_fetchRoot(QString)));
+    connect(fsModel_.data(), SIGNAL(fetchFolderInThread(QModelIndex)),
+            fetchThread_.data(), SLOT(handle_fetchFolder(QModelIndex)));
+
+    connect(fetchThread_.data(), SIGNAL(finished()), fsModel_.data(),
+        SLOT(onThreadWorkDone()));
+
+    return fetchThread_.data();
 }
 
 void DirTreeBuilder::onWorkDone()

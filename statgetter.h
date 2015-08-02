@@ -67,7 +67,7 @@ private:
          const size_t* value = nullptr);
 
 public slots:
-    virtual void onWorkDone();
+    virtual void onWorkDone() override;
 
 private:
     QTableWidget* tableWidget_;

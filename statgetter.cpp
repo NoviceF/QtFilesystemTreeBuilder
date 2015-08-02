@@ -1,14 +1,11 @@
 ﻿#include <cassert>
 
 #include <QApplication>
-#include <QDebug>
 #include <QDir>
 #include <QDirIterator>
 #include <QMessageBox>
 #include <QString>
 #include <QWidget>
-
-#include <unistd.h>
 
 #include "statgetter.h"
 

@@ -31,7 +31,7 @@ private:
     Ui::MainWindow* ui_;
     StatGetter* statGetter_;
     DirTreeBuilder* treeBuilder_;
-    const QFileIconProvider* iconProvider_;
+    const QFileIconProvider iconProvider_;
     const QVector<QFileInfo> disks_;
 };
 

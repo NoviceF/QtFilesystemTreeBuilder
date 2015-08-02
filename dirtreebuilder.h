@@ -4,6 +4,7 @@
 #include <QLabel>
 #include <QObject>
 #include <QStringList>
+#include <QScopedPointer>
 #include <QTreeView>
 
 #include <simplefsmodel.h>
@@ -43,12 +44,16 @@ public:
     QString GetFilePathByIndex(const QModelIndex& index);
     void SetView(QTreeView* view);
 
+private:
+    RemoteFetcherThread* CreateFetchThread();
+
 public slots:
-    virtual void onWorkDone();
+    virtual void onWorkDone() override;
 
 private:
     QTreeView* view_;
-    SimpleFSModel* fsModel_;
+    QScopedPointer<SimpleFSModel> fsModel_;
+    QScopedPointer<RemoteFetcherThread> fetchThread_;
 };
 
 #endif // DIRTREEBUILDER_H

@@ -9,7 +9,6 @@ MainWindow::MainWindow(QWidget* parent) :
     ui_(new Ui::MainWindow),
     statGetter_(new StatGetter(this)),
     treeBuilder_(new DirTreeBuilder(this)),
-    iconProvider_(new QFileIconProvider()),
     disks_(GetDisks())
 {
     ui_->setupUi(this);
@@ -58,7 +57,7 @@ MainWindow::MainWindow(QWidget* parent) :
                     absolutePath.left(absolutePath.size() - 1) :
                     absolutePath;
 
-        ui_->comboBox->addItem(iconProvider_->icon(diskInfo), diskName,
+        ui_->comboBox->addItem(iconProvider_.icon(diskInfo), diskName,
             absolutePath);
     }
 
