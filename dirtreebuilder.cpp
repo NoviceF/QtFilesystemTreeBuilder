@@ -20,10 +20,11 @@ RemoteFetcherThread::RemoteFetcherThread(SimpleFSModel* fsModel,
 
 void RemoteFetcherThread::handle_fetchRoot(const QString& rootPath)
 {
-    // prepare
 
     FetchRoot(rootPath);
-    // finalize
+
+
+
     emit finished();
 }
 
@@ -34,19 +35,49 @@ void RemoteFetcherThread::handle_fetchFolder(const QModelIndex& parent)
     FetchFolder(parent);
     // finalize
     emit finished();
-
 }
 
 void RemoteFetcherThread::FetchRoot(const QString& rootPath)
 {
+    setLabel("Retrieving files count..");
+    emit showLabel();
+    emit setProgressRange(0, 0);
+    emit setProgressValue(0);
+    emit showProgressBar();
+
     QDir pathDir(rootPath);
     pathDir.setFilter(QDir::NoDotAndDotDot | QDir::Dirs);
     const QFileInfoList folders = pathDir.entryInfoList();
-    qCopy(folders.begin(), folders.end(), std::back_inserter(fsModel_->nodes_));
+    const int totalDirCount = folders.size();
+
+    setLabel("Building tree..");
+    emit setProgressRange(0, totalDirCount);
+    emit setProgressValue(0);
+
+    int counter = 0;
+
+    for (QFileInfoList::const_iterator it = folders.begin(); it != folders.end();
+         ++it)
+    {
+        fsModel_->nodes_.push_back(*it);
+        ++counter;
+        emit setProgressValue(counter);
+    }
+
+    emit setProgressValue(totalDirCount);
+
+    emit hideLabel();
+    emit hideProgressBar();
 }
 
 void RemoteFetcherThread::FetchFolder(const QModelIndex& parent)
 {
+    setLabel("Retrieving files count..");
+    emit showLabel();
+    emit setProgressRange(0, 0);
+    emit setProgressValue(0);
+    emit showProgressBar();
+
     Q_ASSERT(parent.isValid());
     NodeInfo* parentInfo = static_cast<NodeInfo*>(parent.internalPointer());
     Q_ASSERT(parentInfo != 0);
@@ -60,9 +91,17 @@ void RemoteFetcherThread::FetchFolder(const QModelIndex& parent)
     QFileInfoList children = dir.entryInfoList(QStringList(), QDir::Dirs |
        QDir::NoDotAndDotDot, QDir::Name);
 
+    const int childrenCount = children.size();
+
+    setLabel("Building tree..");
+    emit setProgressRange(0, childrenCount);
+    emit setProgressValue(0);
+
+    int counter = 0;
+
     const int insrtCnt = children.isEmpty() ?
                 0 :
-                children.size() - 1;
+                childrenCount - 1;
 
     fsModel_->beginInsertRows(parent, 0, insrtCnt);
     parentInfo->children.reserve(children.size());
@@ -72,11 +111,19 @@ void RemoteFetcherThread::FetchFolder(const QModelIndex& parent)
         NodeInfo nodeInfo(entry, parentInfo);
         nodeInfo.mapped = !entry.isDir();
         parentInfo->children.push_back(std::move(nodeInfo));
+
+        ++counter;
+        emit setProgressValue(counter);
     }
 
     parentInfo->mapped = true;
 
     fsModel_->endInsertRows();
+
+    emit setProgressValue(childrenCount);
+
+    emit hideLabel();
+    emit hideProgressBar();
 }
 
 

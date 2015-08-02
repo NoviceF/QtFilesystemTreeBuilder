@@ -93,12 +93,12 @@ void StatGetterThread::onStart()
 {
     setLabel("Retrieving files count..");
     emit showLabel();
-    FillPreAnalysisTree();
-    const size_t totalValue = preAnalysisTree_.size();
-
     emit setProgressRange(0, 0);
     emit setProgressValue(0);
     emit showProgressBar();
+
+    FillPreAnalysisTree();
+    const size_t totalValue = preAnalysisTree_.size();
 
     setLabel("Calculating statistics..");
     emit setProgressRange(0, totalValue);
@@ -188,6 +188,7 @@ size_t StatGetter::GetAvgSizeAllFiles() const
 
     if (totalFilesCount == 0)
         return 0;
+
     return GetTotalFilesSize() / totalFilesCount;
 }
 
