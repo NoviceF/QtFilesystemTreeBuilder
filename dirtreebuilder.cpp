@@ -7,8 +7,6 @@
 #include <QDirIterator>
 #include <QEventLoop>
 
-#include <unistd.h>
-
 #include "dirtreebuilder.h"
 
 RemoteFetcherThread::RemoteFetcherThread(SimpleFSModel* fsModel,
