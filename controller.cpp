@@ -39,7 +39,7 @@ void Controller::RemoveThread()
     running_ = false;
 }
 
-void Controller::RiseRunningThreadWarningMsg()
+void Controller::RiseRunningThreadWarningMsg() const
 {
     QMessageBox msgBox;
     connect(this, SIGNAL(closeMsgBox()), &msgBox, SLOT(close()));
@@ -90,7 +90,7 @@ const QThread& Controller::GetWorkerThread()
     return workerThread_;
 }
 
-void Controller::RiseErrorMsg(const QString& msg)
+void Controller::RiseErrorMsg(const QString& msg) const
 {
     QMessageBox msgBox;
     connect(this, SIGNAL(closeMsgBox()), &msgBox, SLOT(close()));

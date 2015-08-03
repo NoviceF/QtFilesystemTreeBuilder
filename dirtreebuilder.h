@@ -30,7 +30,6 @@ private:
 
 private:
     SimpleFSModel* fsModel_;
-    bool abort_;
 };
 
 
@@ -41,14 +40,14 @@ class DirTreeBuilder : public Controller
 public:
     explicit DirTreeBuilder(QObject* parent = 0);
     void BuildDirTree(const QString& path);
-    QString GetFilePathByIndex(const QModelIndex& index);
+    QString GetFilePathByIndex(const QModelIndex& index) const;
     void SetView(QTreeView* view);
 
 private:
     RemoteFetcherThread* CreateFetchThread();
 
 public slots:
-    virtual void onWorkDone() override;
+    void onWorkDone() override;
 
 private:
     QTreeView* view_;

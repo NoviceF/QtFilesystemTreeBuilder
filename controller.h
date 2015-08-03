@@ -11,10 +11,10 @@ class Controller : public QObject
     Q_OBJECT
 
 public:
-    bool IsRunning() { return running_; }
+    bool IsRunning() const { return running_; }
     void RunThread(IProgressWorker* worker);
     void RemoveThread();
-    void RiseRunningThreadWarningMsg();
+    void RiseRunningThreadWarningMsg() const;
     void SetProgBar(QProgressBar* progBar);
     QProgressBar* GetProgBar();
     void SetLabel(QLabel* label);
@@ -26,7 +26,7 @@ protected:
     ~Controller();
 
 private:
-    void RiseErrorMsg(const QString& msg);
+    void RiseErrorMsg(const QString& msg) const;
 
 signals:
     void closeMsgBox();

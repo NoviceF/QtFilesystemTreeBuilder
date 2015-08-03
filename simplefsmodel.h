@@ -56,7 +56,8 @@ public:
 
     QVariant data(const QModelIndex& index, int role) const override;
 
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
+    QVariant headerData(int section, Qt::Orientation orientation,
+        int role) const override;
 
     bool canFetchMore(const QModelIndex& parent) const override;
     void fetchMore(const QModelIndex& parent) override;

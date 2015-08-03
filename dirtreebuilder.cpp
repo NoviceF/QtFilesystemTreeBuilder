@@ -14,8 +14,7 @@
 RemoteFetcherThread::RemoteFetcherThread(SimpleFSModel* fsModel,
         QProgressBar* progBar, QLabel* label, QObject* parent) :
     IProgressWorker(progBar, label, parent),
-    fsModel_(fsModel),
-    abort_(false)
+    fsModel_(fsModel)
 {}
 
 void RemoteFetcherThread::handle_fetchRoot(const QString& rootPath)
@@ -148,7 +147,7 @@ void DirTreeBuilder::BuildDirTree(const QString& path)
     view_->setModel(fsModel_.data());
 }
 
-QString DirTreeBuilder::GetFilePathByIndex(const QModelIndex& index)
+QString DirTreeBuilder::GetFilePathByIndex(const QModelIndex& index) const
 {
     if (fsModel_)
         return fsModel_->fileInfo(index).absoluteFilePath();

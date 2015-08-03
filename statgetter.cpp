@@ -23,7 +23,7 @@ StatGetterThread::StatGetterThread(const QString& path, StatsCont& statCont,
     }
 }
 
-void StatGetterThread::GetSubdirsCount()
+void StatGetterThread::GetSubdirsCount() const
 {
     subdirsInPathDir_ = 0;
 
@@ -68,13 +68,13 @@ void StatGetterThread::FillStatTreeByPath()
 }
 
 size_t StatGetterThread::GetTotalGroupFilesCount(
-        const infovec_t& infoList)
+        const infovec_t& infoList) const
 {
     return infoList.size();
 }
 
 size_t StatGetterThread::GetTotalGroupFilesSize(
-        const infovec_t& infoList)
+        const infovec_t& infoList) const
 {
     size_t sum = 0;
 

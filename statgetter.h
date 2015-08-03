@@ -33,10 +33,10 @@ public:
 private:
     void FillPreAnalysisTree();
     void FillStatTreeByPath();
-    void GetSubdirsCount();
+    void GetSubdirsCount() const;
 
-    size_t GetTotalGroupFilesCount(const infovec_t& infoList);
-    size_t GetTotalGroupFilesSize(const infovec_t& infoList);
+    size_t GetTotalGroupFilesCount(const infovec_t& infoList) const;
+    size_t GetTotalGroupFilesSize(const infovec_t& infoList) const;
 
 public slots:
     void onStart();
